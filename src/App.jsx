@@ -1167,7 +1167,7 @@ function App() {
                       <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>
                         {t("Sıradaki Gelir Beklentisi")} ({nextExpectedIncome.name}): <strong>+{formatCurrency(nextExpectedIncome.amount)}</strong>
                         <span style={{ fontSize: '0.8rem', opacity: 0.8, marginLeft: '8px', background: '#3b82f6', color: '#fff', padding: '2px 8px', borderRadius: '12px' }}>
-                          {nextExpectedIncome.daysLeft === 0 ? 'Bugün' : `${nextExpectedIncome.daysLeft} {t("Gün Sonra")}`}
+                          {nextExpectedIncome.daysLeft === 0 ? t('Bugün') : `${nextExpectedIncome.daysLeft} ${t("Gün Sonra")}`}
                         </span>
                       </span>
                     </div>
