@@ -29,7 +29,10 @@ import {
   Landmark,
   Briefcase,
   FileSpreadsheet,
-  Bell
+  Bell,
+  Receipt,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import * as XLSX from 'xlsx';
@@ -67,25 +70,40 @@ function App() {
     EUR: 34.20  // Fallback
   });
 
-  // V7: Onboarding (Username) State
+  // V7 & V9: Onboarding (Username) & Custom Reset States
   const [userName, setUserName] = useState(() => localStorage.getItem('nexspend_user') || '');
+  const [isNameModalOpen, setIsNameModalOpen] = useState(false);
+  const [tempUserName, setTempUserName] = useState('');
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   useEffect(() => {
+    // If no username is set, open the custom modal instead of window.prompt
     if (!userName && activeTab === 'dashboard') {
-      // setTimeout to avoid blocking render immediately
       const timer = setTimeout(() => {
-        const name = window.prompt(t("NexSpend'e Hoş Geldiniz! Lütfen adınızı girin:"));
-        if (name && name.trim()) {
-          setUserName(name.trim());
-          localStorage.setItem('nexspend_user', name.trim());
-        } else {
-          setUserName(t('Kullanıcı'));
-          localStorage.setItem('nexspend_user', t('Kullanıcı'));
-        }
+        setIsNameModalOpen(true);
       }, 500);
       return () => clearTimeout(timer);
     }
   }, [userName, activeTab]);
+
+  const handleSaveName = (e) => {
+    e.preventDefault();
+    if (tempUserName && tempUserName.trim()) {
+      setUserName(tempUserName.trim());
+      localStorage.setItem('nexspend_user', tempUserName.trim());
+    } else {
+      setUserName(t('Kullanıcı'));
+      localStorage.setItem('nexspend_user', t('Kullanıcı'));
+    }
+    setIsNameModalOpen(false);
+    setTempUserName('');
+  };
+
+  const handleResetApp = () => {
+    localStorage.clear();
+    localStorage.setItem('nexspend_reset', 'true');
+    window.location.reload();
+  };
 
   // V4: Fetch Live Currency Rates
   useEffect(() => {
@@ -175,6 +193,7 @@ function App() {
   const [subName, setSubName] = useState('');
   const [subAmount, setSubAmount] = useState('');
   const [subCategory, setSubCategory] = useState('entertainment');
+  const [subType, setSubType] = useState('expense'); // V12: 'income' or 'expense'
   const [subDate, setSubDate] = useState('');
 
   // Notifications State
@@ -184,55 +203,21 @@ function App() {
   const [transactions, setTransactions] = useState(() => {
     const saved = localStorage.getItem('nexspend_transactions');
     if (saved) return JSON.parse(saved);
-    if (localStorage.getItem('nexspend_reset')) return [];
-
-    const today = new Date();
-    const formatDateObj = (daysAgo) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() - daysAgo);
-      return {
-        iso: d.toISOString().split('T')[0],
-        tr: d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' })
-      };
-    };
-
-    return [
-      { id: 1, date: formatDateObj(0).tr, originalDate: formatDateObj(0).iso, title: 'Starbucks Kahve', note: 'Sabah kahvesi', category: 'food', amount: -280, type: 'expense', currency: 'TRY' },
-      { id: 2, date: formatDateObj(1).tr, originalDate: formatDateObj(1).iso, title: 'Maaş Ödemesi', note: 'Şubat Maaşı', category: 'income', amount: 85000, type: 'income', currency: 'TRY' },
-      { id: 3, date: formatDateObj(1).tr, originalDate: formatDateObj(1).iso, title: 'Spotify Premium', note: 'Aylık yenileme', category: 'entertainment', amount: -60, type: 'expense', currency: 'TRY' },
-      { id: 4, date: formatDateObj(2).tr, originalDate: formatDateObj(2).iso, title: 'Shell Akaryakıt', note: 'İstanbul-Ankara arası', category: 'transport', amount: -1500, type: 'expense', currency: 'TRY' },
-      { id: 5, date: formatDateObj(20).tr, originalDate: formatDateObj(20).iso, title: 'Migros Market', note: 'Mutfak alışverişi', category: 'food', amount: -1250, type: 'expense', currency: 'TRY' },
-      { id: 6, date: formatDateObj(40).tr, originalDate: formatDateObj(40).iso, title: 'Trendyol Alışverişi', note: 'Kıyafet', category: 'shopping', amount: -3400, type: 'expense', currency: 'TRY' },
-      { id: 7, date: formatDateObj(15).tr, originalDate: formatDateObj(15).iso, title: 'Superonline Fatura', note: '100 Mbps', category: 'bills', amount: -320, type: 'expense', currency: 'TRY' }
-    ];
+    return [];
   });
 
   // Goals State
   const [goals, setGoals] = useState(() => {
     const saved = localStorage.getItem('nexspend_goals');
     if (saved) return JSON.parse(saved);
-    if (localStorage.getItem('nexspend_reset')) return [];
-    return [
-      { id: 1, title: 'Yeni Bilgisayar', targetAmount: 45000, currentAmount: 15000, color: '#8b5cf6' },
-      { id: 2, title: 'Yaz Tatili', targetAmount: 20000, currentAmount: 8500, color: '#10b981' },
-      { id: 3, title: 'Acil Durum Fonu', targetAmount: 100000, currentAmount: 12000, color: '#f59e0b' }
-    ];
+    return [];
   });
 
   // Subscriptions State
   const [subscriptions, setSubscriptions] = useState(() => {
     const saved = localStorage.getItem('nexspend_subscriptions');
     if (saved) return JSON.parse(saved);
-    if (localStorage.getItem('nexspend_reset')) return [];
-    const dateObj = new Date();
-    dateObj.setDate(dateObj.getDate() + 5);
-    const nextDate = dateObj.toISOString().split('T')[0];
-
-    return [
-      { id: 1, name: 'Netflix', amount: 149.99, nextBillingDate: nextDate, category: 'entertainment', active: true },
-      { id: 2, name: 'Spor Salonu', amount: 850, nextBillingDate: nextDate, category: 'other', active: true },
-      { id: 3, name: 'iCloud+', amount: 39.99, nextBillingDate: nextDate, category: 'bills', active: true }
-    ];
+    return [];
   });
 
   // Debts State
@@ -268,7 +253,7 @@ function App() {
     localStorage.setItem('nexspend_theme', theme);
   }, [theme]);
 
-  // V6: Auto-Pay Subscriptions Motor (Runs on Mount)
+  // V10: Akıllı Auto-Pay Subscriptions Motor (Sonsuz Döngü, Runs on Mount)
   useEffect(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -280,26 +265,36 @@ function App() {
       const updatedSubs = prevSubs.map(sub => {
         if (sub.active && sub.nextBillingDate) {
           const subDate = new Date(sub.nextBillingDate);
+
           if (!isNaN(subDate.getTime()) && subDate <= today) {
             hasChanges = true;
+            let currentSubDate = new Date(subDate);
 
-            // 1. Gider İşlemi Yarat
-            newTxs.push({
-              id: Date.now() + Math.random(),
-              date: today.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }),
-              originalDate: today.toISOString().split('T')[0],
-              title: `${sub.name} (Abonelik)`,
-              note: 'Otomatik Yenileme',
-              category: sub.category || 'entertainment',
-              amount: -Math.abs(sub.amount),
-              type: 'expense',
-              currency: 'TRY'
-            });
+            // Bugünü yakalayana dek geçmiş ödenmemiş ayları tek tek kes
+            while (currentSubDate <= today) {
+              const paymentDate = new Date(currentSubDate);
 
-            // 2. Abonelik Tarihini 1 Ay İleri At
-            const nextMonth = new Date(subDate);
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            return { ...sub, nextBillingDate: nextMonth.toISOString().split('T')[0] };
+              // 1. Her geciken (veya bugün ödenen) fatura için sırayla işlem yarat
+              // V12: Regular Income Support
+              const isIncome = sub.type === 'income';
+
+              newTxs.push({
+                id: Date.now() + Math.random(),
+                date: paymentDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }),
+                originalDate: paymentDate.toISOString().split('T')[0],
+                title: `${sub.name} (Düzenli ${isIncome ? 'Gelir' : 'Gider'})`,
+                note: 'Otomatik Yenileme',
+                category: sub.category || (isIncome ? 'income' : 'entertainment'), // V12: Default income category
+                amount: isIncome ? Math.abs(sub.amount) : -Math.abs(sub.amount),
+                type: isIncome ? 'income' : 'expense',
+                currency: 'TRY'
+              });
+
+              // 2. Abonelik Tarihini 1 Ay İleri At
+              currentSubDate.setMonth(currentSubDate.getMonth() + 1);
+            }
+
+            return { ...sub, nextBillingDate: currentSubDate.toISOString().split('T')[0] };
           }
         }
         return sub;
@@ -311,7 +306,7 @@ function App() {
       }
       return prevSubs;
     });
-  }, []); // Run only on mount
+  }, [subscriptions]); // V12: Added subscriptions as dependency so adding an income Triggers motor immediately
 
   useEffect(() => localStorage.setItem('nexspend_lang', language), [language]);
   useEffect(() => localStorage.setItem('nexspend_currency', currency), [currency]);
@@ -335,8 +330,19 @@ function App() {
   };
 
   // Overall Balance calculation (always all-time base currency -> converted to display)
+  // V11: Exclude Future Transactions (Pending)
   const totalBalanceBase = useMemo(() => {
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+
     return transactions.reduce((acc, tx) => {
+      // Future Transaction Check
+      if (tx.originalDate) {
+        const txDateObj = new Date(tx.originalDate);
+        txDateObj.setHours(0, 0, 0, 0);
+        if (txDateObj > todayDate) return acc; // Skip future transactions (Pending)
+      }
+
       const amtBase = toBaseCurrency(Math.abs(tx.amount), tx.currency || 'TRY');
       return acc + (tx.type === 'income' ? amtBase : -amtBase);
     }, 0);
@@ -367,12 +373,22 @@ function App() {
   }, [transactions, searchTerm, filterType, timeFilter]);
 
   // Period Calculations (Income, Expense, Chart)
+  // V11: Exclude Future Transactions from Period Totals
   const { periodIncomeBase, periodExpenseBase, chartData } = useMemo(() => {
     let income = 0;
     let expense = 0;
     const categoryTotals = {};
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
 
     filteredTransactions.forEach(tx => {
+      // Future Transaction Check
+      if (tx.originalDate) {
+        const txDateObj = new Date(tx.originalDate);
+        txDateObj.setHours(0, 0, 0, 0);
+        if (txDateObj > todayDate) return; // Skip future transactions
+      }
+
       const amtBase = toBaseCurrency(Math.abs(tx.amount), tx.currency || 'TRY');
       if (tx.type === 'income') {
         income += amtBase;
@@ -404,10 +420,11 @@ function App() {
     const todayDate = new Date(new Date().toISOString().split('T')[0]);
     const recentExpenses = transactions.filter(t => t.type === 'expense' && toBaseCurrency(Math.abs(t.amount), t.currency) > 0);
 
-    // Subscriptions Insight
-    const totalSubsBase = subscriptions.filter(s => s.active).reduce((sum, s) => sum + s.amount, 0);
+    // Subscriptions Insight (V8: Separate Bills from Keyfi/Entertainment Subscriptions)
+    // Sadece "Faturalar" (bills) dışındaki (eğlence vb.) ve Gider olan abonelikleri topla
+    const totalSubsBase = subscriptions.filter(s => s.active && s.category !== 'bills' && s.type !== 'income').reduce((sum, s) => sum + s.amount, 0);
     if (totalSubsBase > 1000) {
-      insights.push({ type: 'warning', text: `Aylık abonelikleriniz yüksek seviyede (${totalSubsBase}₺). Kullanmadığınız servisleri gözden geçirin.` });
+      insights.push({ type: 'warning', text: `Aylık eğlence/keyfi abonelikleriniz yüksek seviyede (${totalSubsBase}₺). Kullanmadığınız servisleri gözden geçirin.` });
     }
 
     // High single expense insight
@@ -495,11 +512,71 @@ function App() {
     };
   }, [debts]);
 
-  // Real Safely Spendable Balance (Güvenli Para)
+  // Next Expected Regular Income (V12.1 - Sadece En Yakın Sıradaki Gelir)
+  const nextExpectedIncome = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Aktif gelirleri bul, tarihlerini al ve bugünden sonrakileri sırala
+    const upcomingIncomes = subscriptions
+      .filter(s => s.active && s.type === 'income' && s.nextBillingDate)
+      .map(s => {
+        const dateObj = new Date(s.nextBillingDate);
+        dateObj.setHours(0, 0, 0, 0);
+        return { ...s, dateObj };
+      })
+      .filter(s => s.dateObj >= today)
+      .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
+
+    if (upcomingIncomes.length === 0) return null;
+
+    const nextIncome = upcomingIncomes[0];
+    const diffTime = nextIncome.dateObj.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    return {
+      amount: nextIncome.amount,
+      name: nextIncome.name,
+      daysLeft: diffDays
+    };
+  }, [subscriptions]);
+
+  // Real Safely Spendable Balance (Güvenli Para - Zaman Çizelgesi Nakit Akışı)
   const realBalanceBase = useMemo(() => {
-    const subsTotal = subscriptions.filter(s => s.active).reduce((sum, s) => sum + s.amount, 0);
-    return totalBalanceBase - subsTotal - totalUserOwesBase;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 1. Tüm aktif abonelikleri ve düzenli gelirleri tarihlerine göre sırala
+    const upcomingEvents = subscriptions
+      .filter(s => s.active && s.nextBillingDate)
+      .map(s => ({
+        ...s,
+        dateObj: new Date(s.nextBillingDate)
+      }))
+      .filter(s => s.dateObj >= today)
+      .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
+
+    // 2. Zaman Tüneli Simülasyonu
+    let virtualWallet = 0;
+    let maxShortfall = 0;
+
+    upcomingEvents.forEach(event => {
+      if (event.type === 'income') {
+        virtualWallet += Math.abs(event.amount); // Gelir geldi, sanal cüzdan arttı
+      } else {
+        virtualWallet -= Math.abs(event.amount); // Gider çıktı, sanal cüzdan azaldı
+      }
+
+      // 3. Eğer sanal cüzdan o gün eksiye düştüyse, o ana kadarki EN BÜYÜK AÇIĞI (maksimum eksi miktarını) blokaj olarak kaydet
+      if (virtualWallet < 0) {
+        maxShortfall = Math.max(maxShortfall, Math.abs(virtualWallet));
+      }
+    });
+
+    // 4. Mevcut Fiziksel Bakiye - Gelecekte İhtiyaç Duyulacak Olan Max Açık (Blokaj) - Borçlar
+    return totalBalanceBase - maxShortfall - totalUserOwesBase;
   }, [totalBalanceBase, subscriptions, totalUserOwesBase]);
+
 
   // V4: Calendar Events Calculator
   const calendarEvents = useMemo(() => {
@@ -532,8 +609,9 @@ function App() {
 
     // 2. Subscriptions matching this month
     subscriptions.filter(s => s.active).forEach(sub => {
-      if (!sub.date) return;
-      const subDate = new Date(sub.date);
+      // V11 Fix: It was sub.date, should be sub.nextBillingDate
+      if (!sub.nextBillingDate) return;
+      const subDate = new Date(sub.nextBillingDate);
       if (isNaN(subDate.getTime())) return;
 
       let targetDay = subDate.getDate();
@@ -543,10 +621,10 @@ function App() {
 
       events[targetDay].push({
         id: `sub-${sub.id}`,
-        type: 'abonelik',
+        type: sub.type === 'income' ? 'gelir' : 'abonelik',
         title: `🔁 ${sub.name}`,
-        amount: -Math.abs(sub.amount),
-        color: 'var(--accent-primary)'
+        amount: sub.type === 'income' ? Math.abs(sub.amount) : -Math.abs(sub.amount),
+        color: sub.type === 'income' ? 'var(--success)' : 'var(--accent-primary)'
       });
     });
 
@@ -731,11 +809,13 @@ function App() {
       amount: parseFloat(subAmount),
       nextBillingDate: subDate,
       category: subCategory,
+      type: subType, // V12: 'income' or 'expense'
       active: true
     }]);
     setIsSubModalOpen(false);
     setSubName('');
     setSubAmount('');
+    setSubType('expense');
   };
 
   const toggleSub = (id) => setSubscriptions(subscriptions.map(s => s.id === id ? { ...s, active: !s.active } : s));
@@ -773,7 +853,7 @@ function App() {
       // 2. Reflect on Transactions (Main Balance)
       const txType = debt.type === 'they_owe' ? 'income' : 'expense'; // They pay us -> income. We pay them -> expense.
       const newTx = {
-        id: Date.now(),
+        id: Date.now() + Math.random(),
         date: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }),
         originalDate: new Date().toISOString().split('T')[0],
         title: `${debt.personName} - Borç Kapatma`,
@@ -784,7 +864,7 @@ function App() {
         currency: currency,
         receiptUrl: null
       };
-      setTransactions([newTx, ...transactions]);
+      setTransactions((prevTxs) => [newTx, ...prevTxs]);
     }
   };
 
@@ -821,7 +901,7 @@ function App() {
     entertainment: 'Eğlence',
     shopping: 'Alışveriş',
     bills: 'Faturalar',
-    income: 'Gelir / Maaş',
+    income: 'Maaş / Düzenli Gelir', // V12: Added explicitly for regular incomes mapping
     other: 'Diğer'
   };
 
@@ -849,15 +929,15 @@ function App() {
       notifs.push({
         id: 'budget-critical',
         type: 'danger',
-        title: 'Bütçe Kritik Seviyede!',
-        message: `Aylık bütçenizin %${budgetProgress.toFixed(0)}'ini doldurdunuz. Acil olmayan harcamaları durdurun.`
+        title: t('Bütçe Kritik Seviyede!'),
+        message: t('Aylık bütçenizin') + ` %${budgetProgress.toFixed(0)} ` + t('kısmını doldurdunuz. Acil olmayan harcamaları durdurun.')
       });
     } else if (budgetProgress >= 80) {
       notifs.push({
         id: 'budget-warning',
         type: 'warning',
-        title: 'Bütçe Alarmı',
-        message: `Harika gidiyorsunuz ancak aylık bütçenizin %${budgetProgress.toFixed(0)} sınırına ulaştınız.`
+        title: t('Bütçe Alarmı'),
+        message: t('Harika gidiyorsunuz ancak aylık bütçenizin') + ` %${budgetProgress.toFixed(0)} ` + t('sınırına ulaştınız.')
       });
     }
 
@@ -876,8 +956,8 @@ function App() {
         notifs.push({
           id: `sub-${sub.id}`,
           type: 'info',
-          title: 'Yaklaşan Abonelik Ödemesi',
-          message: `"${sub.name}" aboneliğinizin ${formatCurrency(sub.amount)} tutarındaki yenilemesine ${diffDays === 0 ? 'bugün' : diffDays + ' gün'} kaldı.`
+          title: t('Yaklaşan Abonelik Ödemesi'),
+          message: `"${sub.name}" ` + t('aboneliğinizin') + ` ${formatCurrency(sub.amount)} ` + t('tutarındaki yenilemesine') + ` ${diffDays === 0 ? t('bugün') : diffDays + ' ' + t('gün')} ` + t('kaldı.')
         });
       }
     });
@@ -952,6 +1032,12 @@ function App() {
           <a href="#" className={`nav-item ${activeTab === 'subscriptions' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setActiveTab('subscriptions'); }}>
             <Repeat size={20} /> <span style={{ marginLeft: '12px' }}>{t("Abonelikler")}</span>
           </a>
+          <a href="#" className={`nav-item ${activeTab === 'bills' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setActiveTab('bills'); }}>
+            <Receipt size={20} /> <span style={{ marginLeft: '12px' }}>{t("Faturalar")}</span>
+          </a>
+          <a href="#" className={`nav-item ${activeTab === 'incomes' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setActiveTab('incomes'); }}>
+            <TrendingUp size={20} /> <span style={{ marginLeft: '12px' }}>{t("Düzenli Gelirler")}</span>
+          </a>
           <a href="#" className={`nav-item ${activeTab === 'assets' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setActiveTab('assets'); }}>
             <Landmark size={20} /> <span style={{ marginLeft: '12px' }}>{t("Varlıklarım")}</span>
           </a>
@@ -1003,7 +1089,7 @@ function App() {
                   {activeNotifications.length === 0 ? (
                     <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '20px 0', fontSize: '0.9rem' }}>
                       <CheckCheck size={32} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
-                      Harika! Şu an için kritik bir bildiriminiz yok.
+                      {t("Harika! Şu an için kritik bir bildiriminiz yok.")}
                     </div>
                   ) : (
                     activeNotifications.map(notif => (
@@ -1032,7 +1118,7 @@ function App() {
           {/* Time Filter Top Bar */}
           {['dashboard', 'analytics'].includes(activeTab) && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
-              <div style={{ background: 'var(--glass-bg)', padding: '4px', borderRadius: 'var(--radius-md)', display: 'inline-flex', gap: '4px', border: '1px solid var(--glass-border)' }}>
+              <div className="time-filter-wrapper" style={{ background: 'var(--glass-bg)', padding: '4px', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
                 {['all', 'day', 'week', 'month', 'year'].map(period => (
                   <button
                     key={period}
@@ -1071,14 +1157,27 @@ function App() {
                   {/* Real Safe Balance Widget */}
                   <div style={{ marginTop: '12px', padding: '12px', background: 'var(--success-bg)', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--success)', border: '1px solid currentColor' }}>
                     <CheckCheck size={18} />
-                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>Güvenli Bakiye (Abonelikler & Borçlar Düşüldü): <strong>{formatCurrency(realBalanceBase)}</strong></span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t("Güvenli Bakiye (Abonelikler & Borçlar Düşüldü):")} <strong>{formatCurrency(realBalanceBase)}</strong></span>
                   </div>
+
+                  {/* Next Expected Regular Income Widget (V12.1) */}
+                  {nextExpectedIncome && (
+                    <div style={{ marginTop: '8px', padding: '12px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: '#3b82f6', border: '1px solid currentColor' }}>
+                      <TrendingUp size={18} />
+                      <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>
+                        {t("Sıradaki Gelir Beklentisi")} ({nextExpectedIncome.name}): <strong>+{formatCurrency(nextExpectedIncome.amount)}</strong>
+                        <span style={{ fontSize: '0.8rem', opacity: 0.8, marginLeft: '8px', background: '#3b82f6', color: '#fff', padding: '2px 8px', borderRadius: '12px' }}>
+                          {nextExpectedIncome.daysLeft === 0 ? 'Bugün' : `${nextExpectedIncome.daysLeft} {t("Gün Sonra")}`}
+                        </span>
+                      </span>
+                    </div>
+                  )}
 
                   {/* Budget Progress Bar */}
                   <div style={{ marginTop: '16px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      <span>Aylık Bütçe: {formatCurrency(budgetLimit)}</span>
-                      <span>Harcama ({timeFilterLabels[timeFilter]}): {formatCurrency(periodExpenseBase)} ({budgetProgress.toFixed(1)}%)</span>
+                      <span>{t("Aylık Bütçe:")} {formatCurrency(budgetLimit)}</span>
+                      <span>{t("Harcama")} ({timeFilterLabels[timeFilter]}): {formatCurrency(periodExpenseBase)} ({budgetProgress.toFixed(1)}%)</span>
                       <button
                         onClick={() => setIsBudgetModalOpen(true)}
                         style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
@@ -1095,7 +1194,7 @@ function App() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   <div className="card glass-panel" style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <h3>Gelir <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>({timeFilterLabels[timeFilter]})</span></h3>
+                      <h3>{t("Gelir")} <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>({timeFilterLabels[timeFilter]})</span></h3>
                       <div style={{ padding: '8px', background: 'var(--success-bg)', borderRadius: '8px', color: 'var(--success)' }}>
                         <BarChart3 size={20} />
                       </div>
@@ -1104,7 +1203,7 @@ function App() {
                   </div>
                   <div className="card glass-panel" style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <h3>Gider <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>({timeFilterLabels[timeFilter]})</span></h3>
+                      <h3>{t("Gider")} <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>({timeFilterLabels[timeFilter]})</span></h3>
                       <div style={{ padding: '8px', background: 'var(--danger-bg)', borderRadius: '8px', color: 'var(--danger)' }}>
                         <PieChartIcon size={20} />
                       </div>
@@ -1118,7 +1217,7 @@ function App() {
               <section className="transactions-section glass-panel" style={{ padding: '24px' }}>
                 <div className="section-header" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2>İşlem Geçmişi <span style={{ fontSize: '0.9rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>({timeFilterLabels[timeFilter]})</span></h2>
+                    <h2>{t("İşlem Geçmişi")} <span style={{ fontSize: '0.9rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>({timeFilterLabels[timeFilter]})</span></h2>
                   </div>
 
                   {/* Filter Bar */}
@@ -1128,7 +1227,7 @@ function App() {
                       <input
                         type="text"
                         className="filter-input"
-                        placeholder="İşlem ara..."
+                        placeholder={t("İşlem ara...")}
                         style={{ paddingLeft: '40px', width: '100%' }}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -1142,9 +1241,9 @@ function App() {
                         value={filterType}
                         onChange={(e) => setFilterType(e.target.value)}
                       >
-                        <option value="all">Tümü</option>
-                        <option value="expense">Sadece Giderler</option>
-                        <option value="income">Sadece Gelirler</option>
+                        <option value="all">{t("Tümü")}</option>
+                        <option value="expense">{t("Sadece Giderler")}</option>
+                        <option value="income">{t("Sadece Gelirler")}</option>
                       </select>
                     </div>
                   </div>
@@ -1155,11 +1254,11 @@ function App() {
                     <table>
                       <thead>
                         <tr>
-                          <th>İşlem Adı</th>
-                          <th>Kategori</th>
-                          <th>Tarih</th>
-                          <th style={{ textAlign: 'right' }}>Tutar</th>
-                          <th style={{ textAlign: 'center', width: '60px' }}>İşlem</th>
+                          <th>{t("İşlem Adı")}</th>
+                          <th>{t("Kategori")}</th>
+                          <th>{t("Tarih")}</th>
+                          <th style={{ textAlign: 'right' }}>{t("Tutar")}</th>
+                          <th style={{ textAlign: 'center', width: '60px' }}>{t("İşlem")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1168,7 +1267,7 @@ function App() {
                             <td>
                               <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 {tx.title}
-                                {tx.receiptUrl && <Camera size={14} color="var(--accent-primary)" title="Fiş Ekli" />}
+                                {tx.receiptUrl && <Camera size={14} color="var(--accent-primary)" title={t("Fiş Ekli")} />}
                               </div>
                               {tx.note && <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{tx.note}</div>}
                             </td>
@@ -1191,7 +1290,7 @@ function App() {
                                 className="icon-btn"
                                 style={{ color: 'var(--danger)', margin: '0 auto' }}
                                 onClick={() => handleDeleteTransaction(tx.id)}
-                                title="Sil"
+                                title={t("Sil")}
                               >
                                 <Trash2 size={16} />
                               </button>
@@ -1202,7 +1301,7 @@ function App() {
                     </table>
                   ) : (
                     <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-                      <p>Kriterlerinize uygun işlem bulunamadı.</p>
+                      <p>{t("Kriterlerinize uygun işlem bulunamadı.")}</p>
                     </div>
                   )}
                 </div>
@@ -1236,8 +1335,8 @@ function App() {
 
               {/* Chart */}
               <div className="glass-panel" style={{ padding: '32px' }}>
-                <h2>Kategori Dağılımı</h2>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>Giderlerinizin seçili periyottaki dağılımı ({currency})</p>
+                <h2>{t("Kategori Dağılımı")}</h2>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>{t("Giderlerinizin seçili periyottaki dağılımı")} ({currency})</p>
 
                 {chartData.length > 0 ? (
                   <div className="chart-container">
@@ -1259,6 +1358,7 @@ function App() {
                           formatter={(value) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value)}
                           labelFormatter={(label) => categoryLabels[label] || label}
                           contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                          itemStyle={{ color: 'var(--text-primary)' }}
                           cursor={{ fill: 'var(--glass-bg)' }}
                         />
                         <Bar dataKey="value" radius={[4, 4, 0, 0]}>
@@ -1271,7 +1371,7 @@ function App() {
                   </div>
                 ) : (
                   <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
-                    <p>Gösterilecek harcama verisi bulunmuyor.</p>
+                    <p>{t("Gösterilecek harcama verisi bulunmuyor.")}</p>
                   </div>
                 )}
               </div>
@@ -1281,17 +1381,17 @@ function App() {
           {/* TAB: GOALS */}
           {activeTab === 'goals' && (
             <div className="glass-panel animate-fade-in" style={{ padding: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+              <div className="page-header">
                 <div>
-                  <h2>Birikim Hedefleri</h2>
-                  <p style={{ color: 'var(--text-secondary)' }}>Gelecek planlarınız için para biriktirin.</p>
+                  <h2>{t("Birikim Hedefleri")}</h2>
+                  <p style={{ color: 'var(--text-secondary)' }}>{t("Gelecek planlarınız için para biriktirin.")}</p>
                 </div>
                 <button className="btn btn-primary" onClick={() => setIsGoalModalOpen(true)}>
                   <Plus size={18} /> Yeni Hedef
                 </button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
                 {goals.map(goal => {
                   const progress = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
                   const isCompleted = progress >= 100;
@@ -1314,8 +1414,8 @@ function App() {
 
                       <div style={{ marginBottom: '16px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '8px', color: 'var(--text-secondary)' }}>
-                          <span>Biriken: {formatCurrency(goal.currentAmount)}</span>
-                          <span>Hedef: {formatCurrency(goal.targetAmount)}</span>
+                          <span>{t("Biriken")}: {formatCurrency(goal.currentAmount)}</span>
+                          <span>{t("Hedef")}: {formatCurrency(goal.targetAmount)}</span>
                         </div>
                         <div className="progress-container" style={{ height: '10px', background: 'var(--bg-secondary)' }}>
                           <div className="progress-bar" style={{ width: `${progress}%`, background: goal.color }}></div>
@@ -1333,7 +1433,7 @@ function App() {
                     </div>
                   );
                 })}
-                {goals.length === 0 && <p style={{ color: 'var(--text-secondary)' }}>Henüz bir hedefiniz yok.</p>}
+                {goals.length === 0 && <p style={{ color: 'var(--text-secondary)' }}>{t("Henüz bir hedefiniz yok.")}</p>}
               </div>
             </div>
           )}
@@ -1341,13 +1441,13 @@ function App() {
           {/* TAB: SUBSCRIPTIONS */}
           {activeTab === 'subscriptions' && (
             <div className="glass-panel animate-fade-in" style={{ padding: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+              <div className="page-header">
                 <div>
-                  <h2>Aboneliklerim</h2>
-                  <p style={{ color: 'var(--text-secondary)' }}>Düzenli harcamalarınızı ve faturalarınızı yönetin.</p>
+                  <h2>{t("Aboneliklerim")}</h2>
+                  <p style={{ color: 'var(--text-secondary)' }}>{t("Düzenli harcamalarınızı ve aboneliklerinizi yönetin.")}</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => setIsSubModalOpen(true)}>
-                  <Plus size={18} /> Abonelik Ekle
+                <button className="btn btn-primary" onClick={() => { setSubCategory('entertainment'); setSubType('expense'); setIsSubModalOpen(true); }}>
+                  <Plus size={18} /> {t("Abonelik Ekle")}
                 </button>
               </div>
 
@@ -1355,16 +1455,16 @@ function App() {
                 <table>
                   <thead>
                     <tr>
-                      <th>Servis / Fatura</th>
-                      <th>Kategori</th>
-                      <th>Sonraki Çekim</th>
-                      <th>Tutar (Aylık)</th>
-                      <th>Durum</th>
-                      <th style={{ textAlign: 'center' }}>İşlem</th>
+                      <th>{t("Servis / Abonelik")}</th>
+                      <th>{t("Kategori")}</th>
+                      <th>{t("Sonraki Çekim")}</th>
+                      <th>{t("Tutar (Aylık)")}</th>
+                      <th>{t("Durum")}</th>
+                      <th style={{ textAlign: 'center' }}>{t("İşlem")}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {subscriptions.map(sub => (
+                    {subscriptions.filter(s => s.category !== 'bills' && s.type !== 'income').map(sub => (
                       <tr key={sub.id} style={{ opacity: sub.active ? 1 : 0.5 }}>
                         <td style={{ fontWeight: '500' }}>{sub.name}</td>
                         <td><span className="badge" style={{ background: 'var(--bg-tertiary)' }}>{categoryLabels[sub.category]}</span></td>
@@ -1388,7 +1488,121 @@ function App() {
                         </td>
                       </tr>
                     ))}
-                    {subscriptions.length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', padding: '24px' }}>Kayıtlı abonelik yok.</td></tr>}
+                    {subscriptions.filter(s => s.category !== 'bills' && s.type !== 'income').length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', padding: '24px' }}>Kayıtlı abonelik yok.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: BILLS */}
+          {activeTab === 'bills' && (
+            <div className="glass-panel animate-fade-in" style={{ padding: '32px' }}>
+              <div className="page-header">
+                <div>
+                  <h2>{t("Faturalarım")}</h2>
+                  <p style={{ color: 'var(--text-secondary)' }}>{t("Elektrik, su, internet gibi zorunlu giderlerinizi yönetin.")}</p>
+                </div>
+                <button className="btn btn-primary" onClick={() => { setSubCategory('bills'); setSubType('expense'); setIsSubModalOpen(true); }}>
+                  <Plus size={18} /> {t("Fatura Ekle")}
+                </button>
+              </div>
+
+              <div className="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>{t("Fatura Tipi")}</th>
+                      <th>{t("Kategori")}</th>
+                      <th>{t("Ödeme Tarihi")}</th>
+                      <th>{t("Tutar (Aylık)")}</th>
+                      <th>{t("Durum")}</th>
+                      <th style={{ textAlign: 'center' }}>{t("İşlem")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {subscriptions.filter(s => s.category === 'bills' && s.type !== 'income').map(sub => (
+                      <tr key={sub.id} style={{ opacity: sub.active ? 1 : 0.5 }}>
+                        <td style={{ fontWeight: '500' }}>{sub.name}</td>
+                        <td><span className="badge" style={{ background: 'var(--bg-tertiary)' }}>{categoryLabels[sub.category]}</span></td>
+                        <td><CalendarDays size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> {sub.nextBillingDate}</td>
+                        <td style={{ fontWeight: 'bold' }}>{new Intl.NumberFormat('tr-TR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(sub.amount)}</td>
+                        <td>
+                          <button
+                            onClick={() => toggleSub(sub.id)}
+                            style={{
+                              background: sub.active ? 'var(--success-bg)' : 'var(--bg-tertiary)',
+                              color: sub.active ? 'var(--success)' : 'var(--text-secondary)',
+                              border: 'none', padding: '4px 12px', borderRadius: '12px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold'
+                            }}>
+                            {sub.active ? 'Aktif' : 'Durduruldu'}
+                          </button>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <button className="icon-btn" style={{ color: 'var(--danger)', margin: '0 auto' }} onClick={() => deleteSub(sub.id)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {subscriptions.filter(s => s.category === 'bills' && s.type !== 'income').length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', padding: '24px' }}>{t("Kayıtlı fatura yok.")}</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: INCOMES (V12) */}
+          {activeTab === 'incomes' && (
+            <div className="glass-panel animate-fade-in" style={{ padding: '32px' }}>
+              <div className="page-header">
+                <div>
+                  <h2>{t("Düzenli Gelirler")}</h2>
+                  <p style={{ color: 'var(--text-secondary)' }}>{t("Maaş, kira, burs gibi aylık düzenli gelirlerinizi ayarlayın.")}</p>
+                </div>
+                <button className="btn btn-primary" onClick={() => { setSubCategory('income'); setSubType('income'); setIsSubModalOpen(true); }} style={{ background: 'var(--success)' }}>
+                  <Plus size={18} /> {t("Gelir Ekle")}
+                </button>
+              </div>
+
+              <div className="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>{t("Gelir Tipi")}</th>
+                      <th>{t("Durum")}</th>
+                      <th>{t("Sonraki Tahsilat")}</th>
+                      <th>{t("Aylık Tutar")}</th>
+                      <th>{t("Aktiflik")}</th>
+                      <th style={{ textAlign: 'center' }}>{t("İşlem")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {subscriptions.filter(s => s.type === 'income').map(sub => (
+                      <tr key={sub.id} style={{ opacity: sub.active ? 1 : 0.5 }}>
+                        <td style={{ fontWeight: '500', color: 'var(--success)' }}>{sub.name}</td>
+                        <td><span className="badge" style={{ background: 'var(--success-bg)', color: 'var(--success)' }}>Gelir</span></td>
+                        <td><CalendarDays size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> {sub.nextBillingDate}</td>
+                        <td style={{ fontWeight: 'bold', color: 'var(--success)' }}>+{new Intl.NumberFormat('tr-TR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(sub.amount)}</td>
+                        <td>
+                          <button
+                            onClick={() => toggleSub(sub.id)}
+                            style={{
+                              background: sub.active ? 'var(--success-bg)' : 'var(--bg-tertiary)',
+                              color: sub.active ? 'var(--success)' : 'var(--text-secondary)',
+                              border: 'none', padding: '4px 12px', borderRadius: '12px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold'
+                            }}>
+                            {sub.active ? 'Aktif' : 'Durduruldu'}
+                          </button>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <button className="icon-btn" style={{ color: 'var(--danger)', margin: '0 auto' }} onClick={() => deleteSub(sub.id)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {subscriptions.filter(s => s.type === 'income').length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', padding: '24px' }}>{t("Kayıtlı düzenli gelir yok.")}</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -1398,10 +1612,10 @@ function App() {
           {/* TAB: DEBTS (Borçlar) */}
           {activeTab === 'debts' && (
             <div className="glass-panel animate-fade-in" style={{ padding: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+              <div className="page-header">
                 <div>
-                  <h2>Borç ve Alacak Defteri</h2>
-                  <p style={{ color: 'var(--text-secondary)' }}>Kişilere verdiğiniz veya aldığınız borçları takip edin.</p>
+                  <h2>{t("Borç ve Alacak Defteri")}</h2>
+                  <p style={{ color: 'var(--text-secondary)' }}>{t("Kişilere verdiğiniz veya aldığınız borçları takip edin.")}</p>
                 </div>
                 <button className="btn btn-primary" onClick={() => setIsDebtModalOpen(true)}>
                   <Plus size={18} /> Yeni Kayıt
@@ -1413,14 +1627,14 @@ function App() {
                 <div style={{ background: 'var(--bg-tertiary)', padding: '24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ padding: '12px', background: 'var(--success-bg)', color: 'var(--success)', borderRadius: '12px' }}><ArrowDownRight size={24} /></div>
                   <div>
-                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '4px' }}>Toplam Alacak (Bana Ödenecek)</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '4px' }}>{t("Toplam Alacak (Bana Ödenecek)")}</div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--success)' }}>{formatCurrency(totalOwedToUserBase)}</div>
                   </div>
                 </div>
                 <div style={{ background: 'var(--bg-tertiary)', padding: '24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ padding: '12px', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: '12px' }}><ArrowUpRight size={24} /></div>
                   <div>
-                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '4px' }}>Toplam Borç (Benim Ödeyeceğim)</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '4px' }}>{t("Toplam Borç (Benim Ödeyeceğim)")}</div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--danger)' }}>{formatCurrency(totalUserOwesBase)}</div>
                   </div>
                 </div>
@@ -1431,12 +1645,12 @@ function App() {
                 <table>
                   <thead>
                     <tr>
-                      <th>Kişi / Kurum</th>
-                      <th>Tür</th>
-                      <th>Veriliş Tarihi</th>
-                      <th>Tutar</th>
-                      <th>Durum</th>
-                      <th style={{ textAlign: 'right' }}>İşlem</th>
+                      <th>{t("Kişi / Kurum")}</th>
+                      <th>{t("Tür")}</th>
+                      <th>{t("Veriliş Tarihi")}</th>
+                      <th>{t("Tutar")}</th>
+                      <th>{t("Durum")}</th>
+                      <th style={{ textAlign: 'right' }}>{t("İşlem")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1486,7 +1700,7 @@ function App() {
           {/* TAB: ASSETS (Varlıklar & Portföy) */}
           {activeTab === 'assets' && (
             <div className="glass-panel animate-fade-in" style={{ padding: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+              <div className="page-header">
                 <div>
                   <h2>Varlıklarım (Net Servet)</h2>
                   <p style={{ color: 'var(--text-secondary)' }}>Banka hesapları, nakit, altın, hisse senedi ve kripto varlıklarınızı kaydedin.</p>
@@ -1508,11 +1722,11 @@ function App() {
                   </div>
                 </div>
                 <div className="net-worth-stats" style={{ marginTop: '24px', display: 'flex', gap: '24px', position: 'relative', zIndex: 1, opacity: 0.8, fontSize: '0.9rem', flexWrap: 'wrap' }}>
-                  <span>Ana Bakiye: {formatCurrency(totalBalanceBase)}</span>
+                  <span>{t("Ana Bakiye")}: {formatCurrency(totalBalanceBase)}</span>
                   <span>|</span>
-                  <span>Kayıtlı Varlıklar: {formatCurrency(assets.reduce((s, a) => s + a.value, 0))}</span>
+                  <span>{t("Kayıtlı Varlıklar")}: {formatCurrency(assets.reduce((s, a) => s + a.value, 0))}</span>
                   <span>|</span>
-                  <span>Net Borç/Alacak: {formatCurrency(totalOwedToUserBase - totalUserOwesBase)}</span>
+                  <span>{t("Net Borç/Alacak")}: {formatCurrency(totalOwedToUserBase - totalUserOwesBase)}</span>
                 </div>
               </div>
 
@@ -1553,20 +1767,20 @@ function App() {
           {/* TAB: CALENDAR (V4) */}
           {activeTab === 'calendar' && (
             <div className="glass-panel animate-fade-in" style={{ padding: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+              <div className="page-header">
                 <div>
                   <h2>Finansal Takvim</h2>
                   <p style={{ color: 'var(--text-secondary)' }}>Gelirlerinizi, giderlerinizi, aboneliklerinizi ve borç vadelerini gün gün takip edin.</p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <button className="icon-btn" style={{ background: 'var(--bg-tertiary)' }} onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1))}>
-                    <ArrowUpRight size={20} style={{ transform: 'rotate(-45deg)' }} />
+                    <ChevronLeft size={20} />
                   </button>
                   <h3 style={{ margin: 0, minWidth: '150px', textAlign: 'center' }}>
                     {calendarDate.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}
                   </h3>
                   <button className="icon-btn" style={{ background: 'var(--bg-tertiary)' }} onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1))}>
-                    <ArrowUpRight size={20} style={{ transform: 'rotate(45deg)' }} />
+                    <ChevronRight size={20} />
                   </button>
                 </div>
               </div>
@@ -1615,25 +1829,30 @@ function App() {
           {/* TAB: SETTINGS */}
           {activeTab === 'settings' && (
             <div className="glass-panel animate-fade-in" style={{ padding: '32px' }}>
-              <div style={{ marginBottom: '32px' }}>
-                <h2>{t("Genel Ayarlar")}</h2>
-                <p style={{ color: 'var(--text-secondary)' }}>{t("Hesap ve uygulama tercihlerinizi yönetin.")}</p>
+              <div className="page-header">
+                <div>
+                  <h2>{t("Genel Ayarlar")}</h2>
+                  <p style={{ color: 'var(--text-secondary)' }}>{t("Hesap ve uygulama tercihlerinizi yönetin.")}</p>
+                </div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 <div style={{ background: 'var(--bg-tertiary)', padding: '24px', borderRadius: '12px' }}>
-                  <h3 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}><Settings size={18} /> {t("Profil Bilgileri")}</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>{t("İsim Soyisim")}</label>
-                      <input type="text" className="form-control" defaultValue="Eyüp Nazim" disabled style={{ opacity: 0.6 }} />
+                  <h3 style={{ marginBottom: '16px' }}>{t("Profil Bilgileri")}</h3>
+                  <div className="setting-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--glass-border)' }}>
+                    <div>
+                      <div style={{ fontWeight: '500' }}>{t("İsim Soyisim")}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{userName}</div>
                     </div>
+                    <button className="btn btn-secondary" onClick={() => { setTempUserName(userName); setIsNameModalOpen(true); }}>
+                      Düzenle
+                    </button>
                   </div>
                 </div>
 
                 <div style={{ background: 'var(--bg-tertiary)', padding: '24px', borderRadius: '12px' }}>
                   <h3 style={{ marginBottom: '16px' }}>{t("Görünüm ve Tema")}</h3>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: '1px solid var(--glass-border)', marginBottom: '16px' }}>
+                  <div className="setting-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: '1px solid var(--glass-border)', marginBottom: '16px' }}>
                     <div>
                       <div style={{ fontWeight: '500' }}>Uygulama Dili (Language)</div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Türkçe veya İngilizce olarak değiştirin</div>
@@ -1643,7 +1862,7 @@ function App() {
                       <option value="en">🇬🇧 English</option>
                     </select>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div className="setting-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <div style={{ fontWeight: '500' }}>{t("Uygulama Teması")}</div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t("Açık veya koyu tema geçişi")}</div>
@@ -1693,13 +1912,7 @@ function App() {
                   <button
                     className="btn btn-primary"
                     style={{ background: 'var(--danger)', boxShadow: 'none' }}
-                    onClick={() => {
-                      if (window.confirm('Tüm verileri silmek istediğinize emin misiniz?')) {
-                        localStorage.clear();
-                        localStorage.setItem('nexspend_reset', 'true');
-                        window.location.reload();
-                      }
-                    }}
+                    onClick={() => setIsResetModalOpen(true)}
                   >
                     <Trash2 size={16} /> Tüm Uygulamayı Sıfırla
                   </button>
@@ -1708,14 +1921,14 @@ function App() {
             </div>
           )}
         </div>
-      </main>
+      </main >
 
       {/* MODALS */}
       {/* 1. Add Transaction Modal */}
       <div className={`modal-overlay ${isModalOpen ? 'active' : ''}`}>
         <div className="modal-content">
           <div className="modal-header">
-            <h2>Yeni İşlem Ekle</h2>
+            <h2>{t("Yeni İşlem Ekle")}</h2>
             <button type="button" className="icon-btn" onClick={() => setIsModalOpen(false)}><X size={24} /></button>
           </div>
 
@@ -1728,12 +1941,12 @@ function App() {
             </div>
 
             <div className="form-group">
-              <label>Tutar ({CURRENCY_SYMBOLS[currency] || '₺'})</label>
+              <label>{t("Tutar")} ({CURRENCY_SYMBOLS[currency] || '₺'})</label>
               <input type="number" className="form-control" placeholder="0.00" required step="0.01" min="0.01" value={txAmount} onChange={(e) => setTxAmount(e.target.value)} />
             </div>
 
             <div className="form-group">
-              <label>İşlem Başlığı</label>
+              <label>{t("İşlem Başlığı")}</label>
               <input type="text" className="form-control" required value={txTitle} onChange={(e) => setTxTitle(e.target.value)} />
             </div>
 
@@ -1748,7 +1961,7 @@ function App() {
                   if (e.target.value !== '') setIsCategoryManual(true);
                 }}
               >
-                <option value="" disabled>Seçiniz</option>
+                <option value="" disabled>{t("Seçiniz")}</option>
                 {Object.keys(categoryLabels).map(k => <option key={k} value={k}>{categoryLabels[k]}</option>)}
               </select>
             </div>
@@ -1766,23 +1979,23 @@ function App() {
                 </label>
                 {txIsSplit && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <label style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Kişi Sayısı (Siz Dahil):</label>
+                    <label style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{t("Kişi Sayısı (Siz Dahil):")}</label>
                     <input type="number" className="form-control" min="2" value={txSplitCount} onChange={(e) => setTxSplitCount(parseInt(e.target.value) || 2)} style={{ width: '80px', padding: '6px 12px' }} />
-                    <div style={{ fontSize: '0.8rem', color: 'var(--success)', marginLeft: 'auto' }}>Size Düşen: {txAmount ? formatCurrency(txAmount / txSplitCount) : '0'}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--success)', marginLeft: 'auto' }}>{t("Size Düşen")}: {txAmount ? formatCurrency(txAmount / txSplitCount) : '0'}</div>
                   </div>
                 )}
               </div>
             )}
 
             <div className="form-group">
-              <label>Fiş / Fatura Görseli (Opsiyonel OCR)</label>
+              <label>{t("Fiş / Fatura Görseli")} (Opsiyonel OCR)</label>
               <input type="file" accept="image/*" className="form-control" onChange={handleReceiptUpload} style={{ padding: '8px' }} />
               {txReceiptStr && <div style={{ fontSize: '0.8rem', color: 'var(--success)', marginTop: '4px' }}>✓ Görsel eklendi (OCR Analizi yapıldı)</div>}
             </div>
 
             <div className="form-actions">
-              <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>İptal</button>
-              <button type="submit" className="btn btn-primary">Kaydet</button>
+              <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>{t("İptal")}</button>
+              <button type="submit" className="btn btn-primary">{t("Kaydet")}</button>
             </div>
           </form>
         </div>
@@ -1800,7 +2013,7 @@ function App() {
               <input type="number" className="form-control" required min="0" value={tempBudget} onChange={(e) => setTempBudget(e.target.value)} />
             </div>
             <div className="form-actions">
-              <button type="submit" className="btn btn-primary">Kaydet</button>
+              <button type="submit" className="btn btn-primary">{t("Kaydet")}</button>
             </div>
           </form>
         </div>
@@ -1833,17 +2046,17 @@ function App() {
         </div>
       </div>
 
-      {/* 4. Add Subscription Modal */}
+      {/* 4. Add Subscription/Income Modal */}
       <div className={`modal-overlay ${isSubModalOpen ? 'active' : ''}`}>
         <div className="modal-content" style={{ maxWidth: '400px' }}>
           <div className="modal-header">
-            <h2>Abonelik Ekle</h2>
+            <h2>{activeTab === 'incomes' ? t('Düzenli Gelir Ekle') : activeTab === 'bills' ? t('Fatura Ekle') : t('Abonelik Ekle')}</h2>
             <button type="button" className="icon-btn" onClick={() => setIsSubModalOpen(false)}><X size={24} /></button>
           </div>
           <form onSubmit={handleAddSub}>
             <div className="form-group">
-              <label>Servis / Fatura Adı</label>
-              <input type="text" className="form-control" required placeholder="Örn: Netflix, İnternet Faturası" value={subName} onChange={(e) => setSubName(e.target.value)} />
+              <label>{activeTab === 'incomes' ? t('Gelir Başlığı') : activeTab === 'bills' ? t('Fatura Adı') : t('Servis / Abonelik Adı')}</label>
+              <input type="text" className="form-control" required placeholder={activeTab === 'incomes' ? t('Örn: Maaş, Kira Geliri, Burs') : activeTab === 'bills' ? t('Örn: Elektrik, Su Faturası') : t('Örn: Netflix, Spor Salonu')} value={subName} onChange={(e) => setSubName(e.target.value)} />
             </div>
             <div className="form-group">
               <label>Aylık Tutar</label>
@@ -1851,7 +2064,7 @@ function App() {
             </div>
             <div className="form-group">
               <label>Kategori</label>
-              <select className="form-control" required value={subCategory} onChange={(e) => setSubCategory(e.target.value)}>
+              <select className="form-control" required value={subCategory} onChange={(e) => setSubCategory(e.target.value)} disabled={activeTab === 'bills'}>
                 {Object.keys(categoryLabels).map(k => <option key={k} value={k}>{categoryLabels[k]}</option>)}
               </select>
             </div>
@@ -1860,7 +2073,7 @@ function App() {
               <input type="date" className="form-control" required value={subDate} onChange={(e) => setSubDate(e.target.value)} />
             </div>
             <div className="form-actions">
-              <button type="submit" className="btn btn-primary">Kaydet</button>
+              <button type="submit" className="btn btn-primary">{t("Kaydet")}</button>
             </div>
           </form>
         </div>
@@ -1874,7 +2087,7 @@ function App() {
             <button type="button" className="icon-btn" onClick={() => setIsDebtModalOpen(false)}><X size={24} /></button>
           </div>
           <form onSubmit={handleAddDebt}>
-            <div className="form-group" style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+            <div className="form-group form-row" style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
               <button
                 type="button"
                 className={`btn ${debtType === 'they_owe' ? 'btn-primary' : 'btn-secondary'}`}
@@ -1898,7 +2111,7 @@ function App() {
               <input type="text" className="form-control" required placeholder="Örn: Ahmet, Enpara Kredi" value={debtPerson} onChange={(e) => setDebtPerson(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>Tutar ({CURRENCY_SYMBOLS['TRY']})</label>
+              <label>{t("Tutar")} ({CURRENCY_SYMBOLS['TRY']})</label>
               <input type="number" className="form-control" required min="1" step="0.01" value={debtAmount} onChange={(e) => setDebtAmount(e.target.value)} />
             </div>
             <div className="form-group">
@@ -1910,7 +2123,7 @@ function App() {
               <input type="text" className="form-control" placeholder="Örn: Yemek ücreti" value={debtNote} onChange={(e) => setDebtNote(e.target.value)} />
             </div>
             <div className="form-actions">
-              <button type="submit" className="btn btn-primary">Kaydet</button>
+              <button type="submit" className="btn btn-primary">{t("Kaydet")}</button>
             </div>
           </form>
         </div>
@@ -1976,7 +2189,53 @@ function App() {
         </div>
       </div>
 
-    </div>
+      {/* 8. V9 Custom Prompt Modal (Name Input) */}
+      <div className={`modal-overlay ${isNameModalOpen ? 'active' : ''}`}>
+        <div className="modal-content" style={{ maxWidth: '400px', textAlign: 'center' }}>
+          <div className="modal-header" style={{ justifyContent: 'center' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>NexSpend'e Hoş Geldin! ✨</h2>
+          </div>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
+            Sana nasıl hitap etmemizi istersin?
+          </p>
+          <form onSubmit={handleSaveName}>
+            <div className="form-group">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Örn: Göktuğ"
+                autoFocus
+                required
+                value={tempUserName}
+                onChange={(e) => setTempUserName(e.target.value)}
+                style={{ textAlign: 'center', fontSize: '1.1rem', padding: '12px' }}
+              />
+            </div>
+            <div className="form-actions" style={{ marginTop: '24px' }}>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Kullanmaya Başla</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* 9. V9 Custom Confirm Modal (Reset App) */}
+      <div className={`modal-overlay ${isResetModalOpen ? 'active' : ''}`}>
+        <div className="modal-content" style={{ maxWidth: '400px', textAlign: 'center', borderTop: '4px solid var(--danger)' }}>
+          <div style={{ width: '60px', height: '60px', background: 'var(--danger)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto', color: 'white' }}>
+            <AlertCircle size={32} />
+          </div>
+          <h2 style={{ marginBottom: '16px' }}>Tüm Verileri Silmek İstediğinize Emin Misiniz?</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', lineHeight: '1.5' }}>
+            Bu işlem cihazınızdaki <strong>tüm işlemleri, hedefleri, abonelikleri ve ayarları</strong> kalıcı olarak silecektir. Bu işlem geri alınamaz!
+          </p>
+          <div className="form-actions form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <button className="btn btn-secondary" onClick={() => setIsResetModalOpen(false)}>Vazgeç</button>
+            <button className="btn btn-primary" style={{ background: 'var(--danger)', color: 'white', border: 'none' }} onClick={handleResetApp}>Evet, Her Şeyi Sil</button>
+          </div>
+        </div>
+      </div>
+
+    </div >
   );
 }
 

@@ -266,6 +266,13 @@ h6 {
     border-bottom: 1px solid var(--glass-border);
 }
 
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
 .page-title {
     font-size: 1.75rem;
     margin-bottom: 4px;
@@ -773,6 +780,75 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
         grid-column: span 1 !important;
     }
 
+    /* Table Responsive Tweak */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: var(--radius-md);
+        box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.02);
+        /* Hafif kaydırma hissi */
+    }
+
+    /* Tab Headers Mobile */
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 16px;
+    }
+
+    .page-header> :last-child {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        /* Butonlar veya action'lar için sola hizala */
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    th,
+    td {
+        white-space: nowrap;
+        padding: 12px 14px;
+        font-size: 0.85rem;
+    }
+
+    /* Filtre ve Arama Alanı */
+    .filter-bar {
+        flex-direction: column !important;
+        /* Mobilde alt alta olması için */
+        gap: 12px;
+    }
+
+    .filter-input {
+        width: 100%;
+        font-size: 1rem;
+        /* Mobilde click-zoom engellemek için */
+    }
+
+    /* Dashboard UI */
+    .card .amount {
+        font-size: 1.8rem;
+        /* Mobilde rakam taşmalarına karşı */
+    }
+
+    .card h3 {
+        font-size: 0.85rem;
+    }
+
+    /* Zaman Filtresi (Tümü/Ay/Yıl) Yatay Scroll */
+    .time-filter-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        display: flex;
+        gap: 4px;
+    }
+
+    .time-filter-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
     /* Forms & Modals */
     .modal-content {
         padding: 24px 16px;
@@ -780,9 +856,27 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
         width: calc(100% - 32px);
     }
 
+    /* Form satır kırılmaları */
+    .form-row {
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+
     .form-group[style*="display: flex"] {
         flex-direction: column;
         gap: 12px !important;
+    }
+
+    /* Form Aksiyon Butonları */
+    .form-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px;
     }
 
     /* Calendar Grid Mobile Tweaks */
