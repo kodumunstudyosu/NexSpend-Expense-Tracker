@@ -5,6 +5,7 @@ import {
   Home,
   PieChart as PieChartIcon,
   Settings,
+  // Trigger Vercel rebuild (Clean cache deploy)
   Plus,
   X,
   Wallet,
