@@ -2205,7 +2205,6 @@ function App() {
                 type="text"
                 className="form-control"
                 placeholder="Örn: Göktuğ"
-                autoFocus
                 required
                 value={tempUserName}
                 onChange={(e) => setTempUserName(e.target.value)}
