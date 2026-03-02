@@ -46,7 +46,11 @@ import {
   Plane,
   Laptop,
   Smartphone,
-  Heart
+  Heart,
+  Droplet,
+  Zap,
+  Flame,
+  Activity
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import * as XLSX from 'xlsx';
@@ -256,6 +260,39 @@ function App() {
     if (saved) return JSON.parse(saved);
     return [];
   });
+
+  // V15: Live Markets State (Simulation)
+  const [markets, setMarkets] = useState([
+    { id: 'USD', name: 'Dolar', price: 34.50, change: +0.15, isUp: true, icon: '💵' },
+    { id: 'EUR', name: 'Euro', price: 37.10, change: -0.05, isUp: false, icon: '💶' },
+    { id: 'GLD', name: 'Altın (Gr)', price: 3050.25, change: +1.20, isUp: true, icon: '🪙' },
+    { id: 'SLV', name: 'Gümüş (Gr)', price: 38.60, change: -0.40, isUp: false, icon: '🥈' },
+    { id: 'BTC', name: 'Bitcoin', price: 94500.00, change: +2.45, isUp: true, icon: '₿' }
+  ]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMarkets(prev => prev.map(market => {
+        if (Math.random() > 0.4) return market;
+        const fluctuation = market.price * ((Math.random() * 0.001) + 0.0001);
+        const isUp = Math.random() > 0.45;
+        const newPrice = isUp ? market.price + fluctuation : market.price - fluctuation;
+        const newChange = isUp ? market.change + (fluctuation / 10) : market.change - (fluctuation / 10);
+        return {
+          ...market,
+          price: newPrice,
+          change: newChange,
+          isUp: isUp,
+          flash: isUp ? 'up' : 'down'
+        };
+      }));
+
+      setTimeout(() => {
+        setMarkets(prev => prev.map(m => ({ ...m, flash: null })));
+      }, 600);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
   const [assetName, setAssetName] = useState('');
   const [assetType, setAssetType] = useState('bank'); // 'bank', 'crypto', 'gold', 'stock'
@@ -815,7 +852,6 @@ function App() {
     }
   };
 
-  // Subscriptions Handlers
   const handleAddSub = (e) => {
     e.preventDefault();
     if (!subName || !subAmount || !subDate) return;
@@ -824,7 +860,7 @@ function App() {
       name: subName,
       amount: parseFloat(subAmount),
       nextBillingDate: subDate,
-      category: subCategory,
+      category: activeTab === 'incomes' ? 'income' : subCategory,
       type: subType, // V12: 'income' or 'expense'
       active: true
     }]);
@@ -928,6 +964,22 @@ function App() {
     shopping: <ShoppingBag size={20} />,
     bills: <Receipt size={20} />,
     income: <Banknote size={20} />,
+    other: <MoreHorizontal size={20} />
+  };
+
+  const billCategoryLabels = {
+    electricity: 'Elektrik',
+    water: 'Su',
+    gas: 'Doğal Gaz',
+    phone: 'Telefon / İletişim',
+    other: 'Diğer'
+  };
+
+  const billCategoryIcons = {
+    electricity: <Zap size={20} />,
+    water: <Droplet size={20} />,
+    gas: <Flame size={20} />,
+    phone: <Smartphone size={20} />,
     other: <MoreHorizontal size={20} />
   };
 
@@ -1781,6 +1833,34 @@ function App() {
                 </div>
               </div>
 
+              {/* V15 Live Markets Ticker */}
+              <div style={{ marginBottom: '32px' }}>
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontSize: '1.1rem' }}>
+                  <Activity size={20} color="var(--accent-primary)" /> Canlı Piyasa Verileri
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '12px' }}>Demo</span>
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                  {markets.map(market => (
+                    <div key={market.id} className={`glass-panel market-card ${market.flash === 'up' ? 'market-flash-up' : market.flash === 'down' ? 'market-flash-down' : ''}`} style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-tertiary)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '1.5rem' }}>{market.icon}</span>
+                        <div>
+                          <div style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{market.id}</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{market.name}</div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontWeight: 'bold' }}>{market.price.toFixed(2)}</div>
+                        <div style={{ fontSize: '0.8rem', color: market.isUp ? 'var(--success)' : 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', marginTop: '2px' }}>
+                          {market.isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                          {Math.abs(market.change).toFixed(2)}%
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Assets Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
                 {assets.map(asset => {
@@ -2133,23 +2213,25 @@ function App() {
               <label>Aylık Tutar</label>
               <input type="number" className="form-control" required min="0.01" step="0.01" value={subAmount} onChange={(e) => setSubAmount(e.target.value)} />
             </div>
-            <div className="form-group">
-              <label>Kategori</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px', marginTop: '8px', opacity: activeTab === 'bills' ? 0.5 : 1, pointerEvents: activeTab === 'bills' ? 'none' : undefined }}>
-                {Object.keys(categoryLabels).map(k => (
-                  <button
-                    type="button"
-                    key={k}
-                    onClick={() => setSubCategory(k)}
-                    className={`icon-picker-btn ${subCategory === k ? 'selected' : ''}`}
-                    style={{ padding: '10px 4px', gap: '6px' }}
-                  >
-                    {categoryIcons[k]}
-                    <span style={{ fontSize: '0.65rem', fontWeight: '500', textAlign: 'center', wordBreak: 'break-word', lineHeight: '1' }}>{t(categoryLabels[k])}</span>
-                  </button>
-                ))}
+            {activeTab !== 'incomes' && (
+              <div className="form-group">
+                <label>Kategori</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px', marginTop: '8px' }}>
+                  {Object.keys(activeTab === 'bills' ? billCategoryLabels : categoryLabels).map(k => (
+                    <button
+                      type="button"
+                      key={k}
+                      onClick={() => setSubCategory(k)}
+                      className={`icon-picker-btn ${subCategory === k ? 'selected' : ''}`}
+                      style={{ padding: '10px 4px', gap: '6px' }}
+                    >
+                      {activeTab === 'bills' ? billCategoryIcons[k] : categoryIcons[k]}
+                      <span style={{ fontSize: '0.65rem', fontWeight: '500', textAlign: 'center', wordBreak: 'break-word', lineHeight: '1' }}>{t(activeTab === 'bills' ? billCategoryLabels[k] : categoryLabels[k])}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
             <div className="form-group">
               <label>Sonraki Çekim Tarihi</label>
               <input type="date" className="form-control" required value={subDate} onChange={(e) => setSubDate(e.target.value)} />
