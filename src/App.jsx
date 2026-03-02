@@ -815,7 +815,7 @@ function App() {
 
   const handleAddTransaction = (e) => {
     e.preventDefault();
-    if (!txAmount || !txTitle || !txCategory || !txDate) return;
+    if (!txAmount || !txCategory || !txDate) return;
 
     const amountNum = parseFloat(txAmount);
     let formattedDate = txDate;
@@ -1039,6 +1039,7 @@ function App() {
     entertainment: 'Eğlence',
     shopping: 'Alışveriş',
     bills: 'Faturalar',
+    harclik: 'Harçlık',
     income: 'Maaş / Düzenli Gelir', // V12: Added explicitly for regular incomes mapping
     other: 'Diğer'
   };
@@ -1049,6 +1050,7 @@ function App() {
     entertainment: <Gamepad2 size={20} />,
     shopping: <ShoppingBag size={20} />,
     bills: <Receipt size={20} />,
+    harclik: <Coins size={20} />,
     income: <Banknote size={20} />,
     other: <MoreHorizontal size={20} />
   };
