@@ -380,19 +380,24 @@ tr:hover td {
     position: fixed;
     inset: 0;
     background: var(--modal-overlay);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 100;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.25s;
+    will-change: opacity, backdrop-filter;
 }
 
 .modal-overlay.active {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0s;
 }
 
 .modal-content {
@@ -402,15 +407,16 @@ tr:hover td {
     border: 1px solid var(--glass-border);
     padding: 32px;
     border-radius: var(--radius-lg);
-    transform: translateY(20px);
-    transition: transform 0.3s ease;
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     box-shadow: var(--shadow-lg);
     max-height: 90vh;
     overflow-y: auto;
+    will-change: transform;
 }
 
 .modal-overlay.active .modal-content {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
 }
 
 .modal-header {
