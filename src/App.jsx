@@ -1635,7 +1635,7 @@ function App() {
                         {/* Center Label */}
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Toplam</div>
-                          <div style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>{formatCurrency(chartData.reduce((s, c) => s + c.value, 0))}</div>
+                          <div style={{ fontSize: '1.3rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{formatCurrency(chartData.reduce((s, c) => s + c.value, 0))}</div>
                         </div>
                       </div>
 
