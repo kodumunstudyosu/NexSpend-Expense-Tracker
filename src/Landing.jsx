@@ -93,6 +93,7 @@ const STATS = [
 export default function Landing() {
     const navigate = useNavigate();
     const [scrolled, setScrolled] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 40);
@@ -104,7 +105,7 @@ export default function Landing() {
         <div style={{ background: DARK_BG, color: '#f8f9fa', fontFamily: "'Inter', sans-serif", minHeight: '100vh', overflowX: 'hidden' }}>
 
             {/* ── NAVBAR ── */}
-            <nav style={{
+            <nav className="landing-navbar" style={{
                 position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
                 background: scrolled ? 'rgba(10,10,11,0.9)' : 'transparent',
                 backdropFilter: scrolled ? 'blur(20px)' : 'none',
@@ -117,17 +118,26 @@ export default function Landing() {
                     <span style={{ fontSize: '1.5rem' }}>💼</span>
                     <span style={{ fontWeight: '700', fontSize: '1.3rem', background: `linear-gradient(135deg, ${PURPLE}, #6366f1)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NexSpend</span>
                 </div>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <a href="#features" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}
+
+                {/* Hamburger (mobile only) */}
+                <button className="landing-hamburger" onClick={() => setMenuOpen(m => !m)} aria-label="Menu">
+                    <span style={{ transform: menuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }} />
+                    <span style={{ opacity: menuOpen ? 0 : 1 }} />
+                    <span style={{ transform: menuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }} />
+                </button>
+
+                {/* Nav links (desktop: flex row, mobile: dropdown) */}
+                <div className={`landing-nav-links ${menuOpen ? 'open' : ''}`}>
+                    <a href="#features" onClick={() => setMenuOpen(false)} style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}
                         onMouseEnter={e => e.target.style.color = '#fff'} onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.7)'}>
                         Özellikler
                     </a>
-                    <a href="#stats" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}
+                    <a href="#stats" onClick={() => setMenuOpen(false)} style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}
                         onMouseEnter={e => e.target.style.color = '#fff'} onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.7)'}>
                         Neden NexSpend?
                     </a>
                     <button
-                        onClick={() => navigate('/app')}
+                        onClick={() => { navigate('/app'); setMenuOpen(false); }}
                         style={{
                             background: `linear-gradient(135deg, ${PURPLE}, #6366f1)`,
                             color: '#fff', border: 'none', borderRadius: '8px',
@@ -169,7 +179,7 @@ export default function Landing() {
                 </FadeIn>
 
                 <FadeIn delay={0.3}>
-                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <div className="landing-hero-buttons" style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <button
                             onClick={() => navigate('/app')}
                             style={{
@@ -220,7 +230,7 @@ export default function Landing() {
                         {/* App screenshot simulation */}
                         <div style={{ display: 'flex', minHeight: '420px' }}>
                             {/* Sidebar */}
-                            <div style={{ width: '220px', background: 'rgba(28,28,31,0.9)', borderRight: `1px solid ${BORDER}`, padding: '24px 16px', flexShrink: 0 }}>
+                            <div className="landing-mockup-sidebar" style={{ width: '220px', background: 'rgba(28,28,31,0.9)', borderRight: `1px solid ${BORDER}`, padding: '24px 16px', flexShrink: 0 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '32px' }}>
                                     <span style={{ fontSize: '1.2rem' }}>💼</span>
                                     <span style={{ fontWeight: '700', background: `linear-gradient(135deg, ${PURPLE}, #6366f1)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NexSpend</span>
