@@ -1996,7 +1996,7 @@ function App() {
                   <div className="setting-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <div style={{ fontWeight: '500' }}>{t("Uygulama Teması")}</div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t("Açık veya koyu tema geçişi")}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t("Aydınlık veya karanlık tema geçişi")}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button className={`btn ${theme === 'dark' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setTheme('dark')}>🌙 {t("Karanlık")}</button>
