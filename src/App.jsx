@@ -2012,13 +2012,7 @@ function App() {
                       setTxCategory(k);
                       setIsCategoryManual(true);
                     }}
-                    style={{
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                      padding: '12px 8px', borderRadius: '12px', border: txCategory === k ? '2px solid var(--accent-primary)' : '1px solid var(--glass-border)',
-                      background: txCategory === k ? 'var(--accent-primary-20)' : 'var(--bg-tertiary)',
-                      color: txCategory === k ? 'var(--accent-primary)' : 'var(--text-primary)',
-                      cursor: 'pointer', transition: 'all 0.2s', gap: '8px'
-                    }}
+                    className={`icon-picker-btn ${txCategory === k ? 'selected' : ''}`}
                   >
                     {categoryIcons[k]}
                     <span style={{ fontSize: '0.75rem', fontWeight: '500', textAlign: 'center' }}>{t(categoryLabels[k])}</span>
@@ -2104,13 +2098,8 @@ function App() {
                     type="button"
                     key={iconKey}
                     onClick={() => setGoalIcon(iconKey)}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyItems: 'center', placeContent: 'center', height: '45px',
-                      borderRadius: '8px', border: goalIcon === iconKey ? '2px solid var(--accent-primary)' : '1px solid transparent',
-                      background: goalIcon === iconKey ? 'var(--accent-primary-20)' : 'transparent',
-                      color: goalIcon === iconKey ? 'var(--accent-primary)' : 'var(--text-primary)',
-                      cursor: 'pointer', transition: 'all 0.2s'
-                    }}
+                    className={`icon-picker-btn ${goalIcon === iconKey ? 'selected' : ''}`}
+                    style={{ height: '45px', background: goalIcon !== iconKey ? 'transparent' : '' }}
                   >
                     {goalIconOptions[iconKey]}
                   </button>
@@ -2152,13 +2141,8 @@ function App() {
                     type="button"
                     key={k}
                     onClick={() => setSubCategory(k)}
-                    style={{
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                      padding: '10px 4px', borderRadius: '12px', border: subCategory === k ? '2px solid var(--accent-primary)' : '1px solid var(--glass-border)',
-                      background: subCategory === k ? 'var(--accent-primary-20)' : 'var(--bg-tertiary)',
-                      color: subCategory === k ? 'var(--accent-primary)' : 'var(--text-primary)',
-                      cursor: 'pointer', transition: 'all 0.2s', gap: '6px'
-                    }}
+                    className={`icon-picker-btn ${subCategory === k ? 'selected' : ''}`}
+                    style={{ padding: '10px 4px', gap: '6px' }}
                   >
                     {categoryIcons[k]}
                     <span style={{ fontSize: '0.65rem', fontWeight: '500', textAlign: 'center', wordBreak: 'break-word', lineHeight: '1' }}>{t(categoryLabels[k])}</span>
@@ -2243,13 +2227,8 @@ function App() {
                     type="button"
                     key={k}
                     onClick={() => setAssetType(k)}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                      padding: '12px', borderRadius: '12px', border: assetType === k ? '2px solid var(--accent-primary)' : '1px solid var(--glass-border)',
-                      background: assetType === k ? 'var(--accent-primary-20)' : 'var(--bg-tertiary)',
-                      color: assetType === k ? 'var(--accent-primary)' : 'var(--text-primary)',
-                      cursor: 'pointer', transition: 'all 0.2s', fontWeight: '500', fontSize: '0.85rem'
-                    }}
+                    className={`icon-picker-btn ${assetType === k ? 'selected' : ''}`}
+                    style={{ flexDirection: 'row', padding: '12px', fontWeight: '500', fontSize: '0.85rem' }}
                   >
                     {assetIcons[k]}
                     <span>{assetLabels[k]}</span>

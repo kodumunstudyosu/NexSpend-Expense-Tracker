@@ -405,6 +405,8 @@ tr:hover td {
     transform: translateY(20px);
     transition: transform 0.3s ease;
     box-shadow: var(--shadow-lg);
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .modal-overlay.active .modal-content {
@@ -479,6 +481,38 @@ select.form-control {
     justify-content: flex-end;
     gap: 12px;
     margin-top: 32px;
+}
+
+/* --- Icon Selectors (V14 Mobile Fixes) --- */
+.icon-picker-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    gap: 8px;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.icon-picker-btn>* {
+    pointer-events: none;
+}
+
+.icon-picker-btn:active {
+    transform: scale(0.95);
+}
+
+.icon-picker-btn.selected {
+    border: 2px solid var(--accent-primary);
+    background: var(--accent-primary-20);
+    color: var(--accent-primary);
 }
 
 /* --- Utilities for New Features --- */
