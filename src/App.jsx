@@ -33,7 +33,20 @@ import {
   Bell,
   Receipt,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Coffee,
+  CarFront,
+  Gamepad2,
+  ShoppingBag,
+  Banknote,
+  MoreHorizontal,
+  Coins,
+  Bitcoin,
+  GraduationCap,
+  Plane,
+  Laptop,
+  Smartphone,
+  Heart
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import * as XLSX from 'xlsx';
@@ -188,6 +201,7 @@ function App() {
   const [goalTitle, setGoalTitle] = useState('');
   const [goalTargetAmount, setGoalTargetAmount] = useState('');
   const [goalColor, setGoalColor] = useState('#8b5cf6');
+  const [goalIcon, setGoalIcon] = useState('Target');
 
   // Form States (Subscription)
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
@@ -763,7 +777,8 @@ function App() {
       title: goalTitle,
       targetAmount: parseFloat(goalTargetAmount),
       currentAmount: 0,
-      color: goalColor
+      color: goalColor,
+      icon: goalIcon
     }]);
     setGoalTitle('');
     setGoalTargetAmount('');
@@ -904,6 +919,41 @@ function App() {
     bills: 'Faturalar',
     income: 'Maaş / Düzenli Gelir', // V12: Added explicitly for regular incomes mapping
     other: 'Diğer'
+  };
+
+  const categoryIcons = {
+    food: <Coffee size={20} />,
+    transport: <CarFront size={20} />,
+    entertainment: <Gamepad2 size={20} />,
+    shopping: <ShoppingBag size={20} />,
+    bills: <Receipt size={20} />,
+    income: <Banknote size={20} />,
+    other: <MoreHorizontal size={20} />
+  };
+
+  const assetIcons = {
+    bank: <Landmark size={20} />,
+    gold: <Coins size={20} />,
+    stock: <TrendingUp size={20} />,
+    crypto: <Bitcoin size={20} />
+  };
+
+  const assetLabels = {
+    bank: 'Banka / Nakit',
+    gold: 'Altın / Döviz',
+    stock: 'Hisse / Borsa',
+    crypto: 'Kripto Para'
+  };
+
+  const goalIconOptions = {
+    Target: <Target size={20} />,
+    Home: <Home size={20} />,
+    CarFront: <CarFront size={20} />,
+    GraduationCap: <GraduationCap size={20} />,
+    Plane: <Plane size={20} />,
+    Laptop: <Laptop size={20} />,
+    Smartphone: <Smartphone size={20} />,
+    Heart: <Heart size={20} />
   };
 
   const timeFilterLabels = {
@@ -1405,8 +1455,8 @@ function App() {
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: `${goal.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${goal.color}44` }}>
-                            <Target color={goal.color} size={20} />
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: `${goal.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${goal.color}44`, color: goal.color }}>
+                            {goal.icon && goalIconOptions[goal.icon] ? React.cloneElement(goalIconOptions[goal.icon], { size: 20 }) : <Target size={20} />}
                           </div>
                           <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{goal.title}</h3>
                         </div>
@@ -1953,18 +2003,28 @@ function App() {
 
             <div className="form-group">
               <label>Kategori</label>
-              <select
-                className="form-control"
-                required
-                value={txCategory}
-                onChange={(e) => {
-                  setTxCategory(e.target.value);
-                  if (e.target.value !== '') setIsCategoryManual(true);
-                }}
-              >
-                <option value="" disabled>{t("Seçiniz")}</option>
-                {Object.keys(categoryLabels).map(k => <option key={k} value={k}>{categoryLabels[k]}</option>)}
-              </select>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '8px', marginTop: '8px' }}>
+                {Object.keys(categoryLabels).map(k => (
+                  <button
+                    type="button"
+                    key={k}
+                    onClick={() => {
+                      setTxCategory(k);
+                      setIsCategoryManual(true);
+                    }}
+                    style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      padding: '12px 8px', borderRadius: '12px', border: txCategory === k ? '2px solid var(--accent-primary)' : '1px solid var(--glass-border)',
+                      background: txCategory === k ? 'var(--accent-primary-20)' : 'var(--bg-tertiary)',
+                      color: txCategory === k ? 'var(--accent-primary)' : 'var(--text-primary)',
+                      cursor: 'pointer', transition: 'all 0.2s', gap: '8px'
+                    }}
+                  >
+                    {categoryIcons[k]}
+                    <span style={{ fontSize: '0.75rem', fontWeight: '500', textAlign: 'center' }}>{t(categoryLabels[k])}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="form-group">
@@ -2037,8 +2097,29 @@ function App() {
               <input type="number" className="form-control" required min="1" value={goalTargetAmount} onChange={(e) => setGoalTargetAmount(e.target.value)} />
             </div>
             <div className="form-group">
+              <label>İkon Seçimi</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '8px', marginTop: '8px', padding: '12px', background: 'var(--bg-tertiary)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                {Object.keys(goalIconOptions).map(iconKey => (
+                  <button
+                    type="button"
+                    key={iconKey}
+                    onClick={() => setGoalIcon(iconKey)}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyItems: 'center', placeContent: 'center', height: '45px',
+                      borderRadius: '8px', border: goalIcon === iconKey ? '2px solid var(--accent-primary)' : '1px solid transparent',
+                      background: goalIcon === iconKey ? 'var(--accent-primary-20)' : 'transparent',
+                      color: goalIcon === iconKey ? 'var(--accent-primary)' : 'var(--text-primary)',
+                      cursor: 'pointer', transition: 'all 0.2s'
+                    }}
+                  >
+                    {goalIconOptions[iconKey]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="form-group form-row">
               <label>Renk Seçimi</label>
-              <input type="color" className="form-control" style={{ height: '50px', padding: '4px' }} value={goalColor} onChange={(e) => setGoalColor(e.target.value)} />
+              <input type="color" className="form-control" style={{ height: '50px', padding: '4px', maxWidth: '80px' }} value={goalColor} onChange={(e) => setGoalColor(e.target.value)} />
             </div>
             <div className="form-actions">
               <button type="submit" className="btn btn-primary">Hedefi Oluştur</button>
@@ -2065,9 +2146,25 @@ function App() {
             </div>
             <div className="form-group">
               <label>Kategori</label>
-              <select className="form-control" required value={subCategory} onChange={(e) => setSubCategory(e.target.value)} disabled={activeTab === 'bills'}>
-                {Object.keys(categoryLabels).map(k => <option key={k} value={k}>{categoryLabels[k]}</option>)}
-              </select>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px', marginTop: '8px', opacity: activeTab === 'bills' ? 0.5 : 1, pointerEvents: activeTab === 'bills' ? 'none' : 'auto' }}>
+                {Object.keys(categoryLabels).map(k => (
+                  <button
+                    type="button"
+                    key={k}
+                    onClick={() => setSubCategory(k)}
+                    style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      padding: '10px 4px', borderRadius: '12px', border: subCategory === k ? '2px solid var(--accent-primary)' : '1px solid var(--glass-border)',
+                      background: subCategory === k ? 'var(--accent-primary-20)' : 'var(--bg-tertiary)',
+                      color: subCategory === k ? 'var(--accent-primary)' : 'var(--text-primary)',
+                      cursor: 'pointer', transition: 'all 0.2s', gap: '6px'
+                    }}
+                  >
+                    {categoryIcons[k]}
+                    <span style={{ fontSize: '0.65rem', fontWeight: '500', textAlign: 'center', wordBreak: 'break-word', lineHeight: '1' }}>{t(categoryLabels[k])}</span>
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="form-group">
               <label>Sonraki Çekim Tarihi</label>
@@ -2092,18 +2189,18 @@ function App() {
               <button
                 type="button"
                 className={`btn ${debtType === 'they_owe' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ flex: 1, ...(debtType === 'they_owe' ? { background: 'var(--success)', color: 'white', boxShadow: 'none' } : {}) }}
+                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', ...(debtType === 'they_owe' ? { background: 'var(--success)', color: 'white', boxShadow: 'none' } : {}) }}
                 onClick={() => setDebtType('they_owe')}
               >
-                Bana Borcu Var (Alacak)
+                <ArrowUpRight size={18} /> Bana Borcu Var (Alacak)
               </button>
               <button
                 type="button"
                 className={`btn ${debtType === 'i_owe' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ flex: 1, ...(debtType === 'i_owe' ? { background: 'var(--danger)', color: 'white', boxShadow: 'none' } : {}) }}
+                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', ...(debtType === 'i_owe' ? { background: 'var(--danger)', color: 'white', boxShadow: 'none' } : {}) }}
                 onClick={() => setDebtType('i_owe')}
               >
-                Benim Borcum Var
+                <ArrowDownRight size={18} /> Benim Borcum Var
               </button>
             </div>
 
@@ -2140,12 +2237,25 @@ function App() {
           <form onSubmit={handleAddAsset}>
             <div className="form-group">
               <label>Varlık Tipi</label>
-              <select className="form-control" required value={assetType} onChange={(e) => setAssetType(e.target.value)}>
-                <option value="bank">Banka / Nakit / Kart</option>
-                <option value="gold">Altın / Döviz</option>
-                <option value="stock">Hisse Senedi (Borsa)</option>
-                <option value="crypto">Kripto Para</option>
-              </select>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '8px' }}>
+                {Object.keys(assetLabels).map(k => (
+                  <button
+                    type="button"
+                    key={k}
+                    onClick={() => setAssetType(k)}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                      padding: '12px', borderRadius: '12px', border: assetType === k ? '2px solid var(--accent-primary)' : '1px solid var(--glass-border)',
+                      background: assetType === k ? 'var(--accent-primary-20)' : 'var(--bg-tertiary)',
+                      color: assetType === k ? 'var(--accent-primary)' : 'var(--text-primary)',
+                      cursor: 'pointer', transition: 'all 0.2s', fontWeight: '500', fontSize: '0.85rem'
+                    }}
+                  >
+                    {assetIcons[k]}
+                    <span>{assetLabels[k]}</span>
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="form-group">
               <label>Varlık Adı / Kurum</label>
