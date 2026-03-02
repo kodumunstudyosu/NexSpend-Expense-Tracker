@@ -1242,69 +1242,71 @@ function App() {
 
       {/* Main Content */}
       <main className="main-content">
-        <header className="topbar">
-          <div>
-            <h1 className="page-title">{t("Merhaba")}, {userName} <span style={{ fontSize: '1.2rem' }}>👋</span></h1>
-            <p className="page-subtitle">{t("İşte finansal özetin")}</p>
-          </div>
-
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {/* V4: Notification Bell & Dropdown */}
-            <div style={{ position: 'relative' }}>
-              <button
-                className="icon-btn"
-                style={{ background: 'var(--bg-tertiary)', position: 'relative' }}
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-              >
-                <Bell size={20} />
-                {activeNotifications.length > 0 && (
-                  <span style={{ position: 'absolute', top: '2px', right: '2px', width: '10px', height: '10px', backgroundColor: 'var(--danger)', borderRadius: '50%', border: '2px solid var(--glass-bg)' }}></span>
-                )}
-              </button>
-
-              {isNotificationsOpen && (
-                <div className="notification-dropdown glass-panel animate-fade-in" style={{ position: 'absolute', top: 'calc(100% + 12px)', right: 0, width: '320px', zIndex: 100, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.5)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <h3 style={{ fontSize: '1.1rem', margin: 0 }}>{t("Bildirim Merkezi")}</h3>
-                      <span style={{ fontSize: '0.8rem', background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '12px' }}>{activeNotifications.length} {t("Uyarı")}</span>
-                    </div>
-                    <button
-                      className="icon-btn"
-                      onClick={() => setIsNotificationsOpen(false)}
-                      style={{ padding: '4px', color: 'var(--text-secondary)' }}
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-
-                  {activeNotifications.length === 0 ? (
-                    <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '20px 0', fontSize: '0.9rem' }}>
-                      <CheckCheck size={32} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
-                      {t("Harika! Şu an için kritik bir bildiriminiz yok.")}
-                    </div>
-                  ) : (
-                    activeNotifications.map(notif => (
-                      <div key={notif.id} style={{ padding: '12px', borderRadius: '8px', background: `var(--${notif.type}-bg)`, border: `1px solid var(--${notif.type})` }}>
-                        <div style={{ fontWeight: 'bold', color: `var(--${notif.type})`, fontSize: '0.95rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <AlertCircle size={16} /> {notif.title}
-                        </div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{notif.message}</div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
+        {activeTab === 'dashboard' && (
+          <header className="topbar">
+            <div>
+              <h1 className="page-title">{t("Merhaba")}, {userName} <span style={{ fontSize: '1.2rem' }}>👋</span></h1>
+              <p className="page-subtitle">{t("İşte finansal özetin")}</p>
             </div>
 
-            {activeTab === 'dashboard' && (
-              <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-                <Plus size={18} /> Yeni İşlem
-              </button>
-            )}
-          </div>
-        </header>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {/* V4: Notification Bell & Dropdown */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  className="icon-btn"
+                  style={{ background: 'var(--bg-tertiary)', position: 'relative' }}
+                  onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                >
+                  <Bell size={20} />
+                  {activeNotifications.length > 0 && (
+                    <span style={{ position: 'absolute', top: '2px', right: '2px', width: '10px', height: '10px', backgroundColor: 'var(--danger)', borderRadius: '50%', border: '2px solid var(--glass-bg)' }}></span>
+                  )}
+                </button>
+
+                {isNotificationsOpen && (
+                  <div className="notification-dropdown glass-panel animate-fade-in" style={{ position: 'absolute', top: 'calc(100% + 12px)', right: 0, width: '320px', zIndex: 100, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.5)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h3 style={{ fontSize: '1.1rem', margin: 0 }}>{t("Bildirim Merkezi")}</h3>
+                        <span style={{ fontSize: '0.8rem', background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '12px' }}>{activeNotifications.length} {t("Uyarı")}</span>
+                      </div>
+                      <button
+                        className="icon-btn"
+                        onClick={() => setIsNotificationsOpen(false)}
+                        style={{ padding: '4px', color: 'var(--text-secondary)' }}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+
+                    {activeNotifications.length === 0 ? (
+                      <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '20px 0', fontSize: '0.9rem' }}>
+                        <CheckCheck size={32} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
+                        {t("Harika! Şu an için kritik bir bildiriminiz yok.")}
+                      </div>
+                    ) : (
+                      activeNotifications.map(notif => (
+                        <div key={notif.id} style={{ padding: '12px', borderRadius: '8px', background: `var(--${notif.type}-bg)`, border: `1px solid var(--${notif.type})` }}>
+                          <div style={{ fontWeight: 'bold', color: `var(--${notif.type})`, fontSize: '0.95rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <AlertCircle size={16} /> {notif.title}
+                          </div>
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{notif.message}</div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {activeTab === 'dashboard' && (
+                <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+                  <Plus size={18} /> Yeni İşlem
+                </button>
+              )}
+            </div>
+          </header>
+        )}
 
         <div className="content-area animate-fade-in">
 
