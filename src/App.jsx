@@ -1644,6 +1644,8 @@ function App() {
                             <Tooltip
                               formatter={(value, name) => [new Intl.NumberFormat('tr-TR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value), name]}
                               contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                              itemStyle={{ color: 'var(--text-primary)' }}
+                              labelStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }}
                             />
                           </PieChart>
                         </ResponsiveContainer>
