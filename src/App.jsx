@@ -7,6 +7,7 @@ import {
   Settings,
   // Trigger Vercel rebuild (Clean cache deploy)
   Plus,
+  Minus,
   X,
   Wallet,
   Trash2,
@@ -68,7 +69,11 @@ const CURRENCY_SYMBOLS = {
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('nexspend_active_tab') || 'dashboard');
+
+  useEffect(() => {
+    localStorage.setItem('nexspend_active_tab', activeTab);
+  }, [activeTab]);
 
   // Theme State
   const [theme, setTheme] = useState(() => localStorage.getItem('nexspend_theme') || 'dark');
