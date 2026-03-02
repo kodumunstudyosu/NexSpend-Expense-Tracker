@@ -216,7 +216,6 @@ function App() {
   const [isFundModalOpen, setIsFundModalOpen] = useState(false);
   const [fundGoalId, setFundGoalId] = useState(null);
   const [fundAmount, setFundAmount] = useState('');
-  const [fundType, setFundType] = useState('add'); // 'add' or 'remove'
 
   // Form States (Subscription)
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
@@ -839,7 +838,6 @@ function App() {
   const handleOpenFundModal = (id) => {
     setFundGoalId(id);
     setFundAmount('');
-    setFundType('add');
     setIsFundModalOpen(true);
   };
 
@@ -852,44 +850,22 @@ function App() {
     const goal = goals.find(g => g.id === fundGoalId);
     if (!goal) return;
 
-    if (fundType === 'add') {
-      setGoals(goals.map(g => g.id === fundGoalId ? { ...g, currentAmount: g.currentAmount + amount } : g));
-      // Hedefe aktarılan tutarı gider olarak ana bakiyeden düş
-      const newTx = {
-        id: Date.now() + Math.random(),
-        date: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }),
-        originalDate: new Date().toISOString().split('T')[0],
-        title: `Hedefe Aktarım: ${goal.title}`,
-        note: 'Birikim Kumbarasına Eklendi',
-        category: 'other',
-        amount: -Math.abs(amount),
-        type: 'expense',
-        currency: currency,
-        receiptUrl: null
-      };
-      setTransactions((prevTxs) => [newTx, ...prevTxs]);
-    } else {
-      // Çıkarım İşlemi (Geri Çekme)
-      if (goal.currentAmount < amount) {
-        alert(t("Hedefte bu kadar bakiye yok!"));
-        return;
-      }
-      setGoals(goals.map(g => g.id === fundGoalId ? { ...g, currentAmount: g.currentAmount - amount } : g));
-      // Hedefe geri aktarılan tutarı gelir olarak ana bakiyeye ekle
-      const newTx = {
-        id: Date.now() + Math.random(),
-        date: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }),
-        originalDate: new Date().toISOString().split('T')[0],
-        title: `Hedef İptali/Çekim: ${goal.title}`,
-        note: 'Birikim Kumbarasından İade',
-        category: 'other',
-        amount: Math.abs(amount),
-        type: 'income',
-        currency: currency,
-        receiptUrl: null
-      };
-      setTransactions((prevTxs) => [newTx, ...prevTxs]);
-    }
+    setGoals(goals.map(g => g.id === fundGoalId ? { ...g, currentAmount: g.currentAmount + amount } : g));
+
+    // Hedefe aktarılan tutarı gider olarak ana bakiyeden düş
+    const newTx = {
+      id: Date.now() + Math.random(),
+      date: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }),
+      originalDate: new Date().toISOString().split('T')[0],
+      title: `Hedefe Aktarım: ${goal.title}`,
+      note: 'Birikim Kumbarasına Eklendi',
+      category: 'other',
+      amount: -Math.abs(amount),
+      type: 'expense',
+      currency: currency,
+      receiptUrl: null
+    };
+    setTransactions((prevTxs) => [newTx, ...prevTxs]);
 
     setIsFundModalOpen(false);
   };
@@ -1555,12 +1531,7 @@ function App() {
                           <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{goal.title}</h3>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                          <button className="icon-btn" onClick={() => handleOpenFundModal(goal.id)} style={{ color: 'var(--accent-primary)', background: 'var(--bg-secondary)', padding: '8px' }}>
-                            <Plus size={18} />
-                          </button>
-                          <button className="icon-btn" onClick={() => { setFundGoalId(goal.id); setFundAmount(''); setFundType('remove'); setIsFundModalOpen(true); }} style={{ color: 'var(--danger)', background: 'var(--bg-secondary)', padding: '8px' }} disabled={goal.currentAmount <= 0}>
-                            <Minus size={18} />
-                          </button>
+                          <button className="btn btn-secondary" onClick={() => handleOpenFundModal(goal.id)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>Bakiye Ekle</button>
                           <button className="icon-btn" onClick={() => handleDeleteGoal(goal.id)} style={{ color: 'var(--text-secondary)' }}><Trash2 size={16} /></button>
                         </div>
                       </div>
@@ -2260,39 +2231,20 @@ function App() {
       <div className={`modal-overlay ${isFundModalOpen ? 'active' : ''}`}>
         <div className="modal-content" style={{ maxWidth: '400px' }}>
           <div className="modal-header">
-            <h2>Bakiye Yönetimi</h2>
+            <h2>Hedefe Para Ekle</h2>
             <button type="button" className="icon-btn" onClick={() => setIsFundModalOpen(false)}><X size={24} /></button>
           </div>
           <form onSubmit={handleSaveFund}>
-            <div className="form-group" style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-              <button
-                type="button"
-                className={`btn ${fundType === 'add' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ flex: 1, background: fundType === 'add' ? 'var(--success)' : '' }}
-                onClick={() => setFundType('add')}
-              >
-                📥 Ekle
-              </button>
-              <button
-                type="button"
-                className={`btn ${fundType === 'remove' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ flex: 1, background: fundType === 'remove' ? 'var(--danger)' : '' }}
-                onClick={() => setFundType('remove')}
-              >
-                📤 Çıkar
-              </button>
-            </div>
             <div className="form-group">
-              <label>Tutar ({CURRENCY_SYMBOLS['TRY']})</label>
-              <input type="number" className="form-control" required min="1" step="0.01" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="0.00" />
+              <label>Eklenecek Tutar ({CURRENCY_SYMBOLS['TRY']})</label>
+              <input type="number" className="form-control" required min="1" step="0.01" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="Örn: 500" />
             </div>
-            <div className="form-group" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '8px' }}>
-              {fundType === 'add'
-                ? 'ℹ️ Eklenen tutar, ana bakiyenizden (Net Servetinizden) gider olarak düşülüp bu kumbara hedefine özel olarak kaydedilecektir.'
-                : 'ℹ️ Çıkarılan tutar, bu kumbaradan alınarak tekrar ana bakiyenize (Net Servet) iade edilecektir.'}
+            <div className="form-group" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              ℹ️ Eklenen tutar ana kasanızdan (Net Servet) düşülecektir.
             </div>
             <div className="form-actions">
-              <button type="submit" className="btn btn-primary">{t("Kaydet")}</button>
+              <button type="button" className="btn btn-secondary" onClick={() => setIsFundModalOpen(false)}>İptal</button>
+              <button type="submit" className="btn btn-primary">Hedefe Ekle</button>
             </div>
           </form>
         </div>
