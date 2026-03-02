@@ -1248,23 +1248,6 @@ function App() {
             <p className="page-subtitle">{t("İşte finansal özetin")}</p>
           </div>
 
-          {/* V17: Backup Reminder Banner */}
-          {isBackupStale && !backupBannerDismissed && (
-            <div style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05))', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '-8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
-                <Shield size={18} color="#f59e0b" />
-                <span>{lastBackupDate ? `Son yedeğiniz ${new Date(lastBackupDate).toLocaleDateString('tr-TR')} tarihli. Verilerinizi güvende tutmak için yedekleyin.` : 'Henüz hiç yedek almadınız. Verilerinizi koruma altına alın!'}</span>
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '0.8rem', background: '#f59e0b' }} onClick={handleBackupData}>
-                  <Download size={14} /> Şimdi Yedekle
-                </button>
-                <button className="icon-btn" style={{ padding: '4px', color: 'var(--text-secondary)' }} onClick={() => setBackupBannerDismissed(true)}>
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
-          )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {/* V4: Notification Bell & Dropdown */}
@@ -1324,6 +1307,47 @@ function App() {
         </header>
 
         <div className="content-area animate-fade-in">
+
+          {/* Yedekleme Uyarı Banner */}
+          {isBackupStale && !backupBannerDismissed && (
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.04))',
+              border: '1px solid rgba(245,158,11,0.3)',
+              borderRadius: '12px',
+              padding: '12px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              flexWrap: 'wrap',
+              marginBottom: '16px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', flex: 1, minWidth: 0 }}>
+                <Shield size={18} color="#f59e0b" style={{ flexShrink: 0 }} />
+                <span style={{ color: 'var(--text-primary)' }}>
+                  {lastBackupDate
+                    ? `Son yedek: ${new Date(lastBackupDate).toLocaleDateString('tr-TR')}. Güncelleyin.`
+                    : 'Henüz yedek almadınız. Verilerinizi koruyun!'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                <button
+                  className="btn btn-primary"
+                  style={{ padding: '6px 14px', fontSize: '0.8rem', background: '#f59e0b' }}
+                  onClick={handleBackupData}
+                >
+                  <Download size={14} /> Yedekle
+                </button>
+                <button
+                  className="icon-btn"
+                  style={{ padding: '4px' }}
+                  onClick={() => setBackupBannerDismissed(true)}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Time Filter Top Bar */}
           {['dashboard', 'analytics'].includes(activeTab) && (
