@@ -1389,9 +1389,13 @@ function App() {
                   <p className="amount" style={{ fontSize: '2.5rem', margin: '4px 0' }}>{formatCurrency(totalBalanceBase)}</p>
 
                   {/* Real Safe Balance Widget */}
-                  <div style={{ marginTop: '12px', padding: '12px', background: 'var(--success-bg)', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--success)', border: '1px solid currentColor' }}>
-                    <CheckCheck size={18} />
-                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t("Güvenli Bakiye (Abonelikler & Borçlar Düşüldü):")} <strong>{formatCurrency(realBalanceBase)}</strong></span>
+                  <div style={{ marginTop: '12px', padding: '10px 12px', background: 'var(--success-bg)', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--success)', border: '1px solid currentColor' }}>
+                    <CheckCheck size={18} style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.9rem', fontWeight: '500', lineHeight: '1.2' }}>
+                      <span className="mobile-hide">{t("Güvenli Bakiye (Abonelikler & Borçlar Düşüldü):")}</span>
+                      <span className="mobile-show">{t("Güvenli Bakiye:")}</span>
+                      {' '}<strong>{formatCurrency(realBalanceBase)}</strong>
+                    </span>
                   </div>
 
                   {/* Next Expected Regular Income Widget (V12.1) */}
@@ -1448,7 +1452,7 @@ function App() {
               </div>
 
               {/* Transactions Section */}
-              <section className="transactions-section glass-panel" style={{ padding: '24px' }}>
+              <section className="transactions-section glass-panel" style={{ padding: 'clamp(16px, 4vw, 24px)' }}>
                 <div className="section-header" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h2>{t("İşlem Geçmişi")} <span style={{ fontSize: '0.9rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>({timeFilterLabels[timeFilter]})</span></h2>
@@ -1566,7 +1570,7 @@ function App() {
               <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
                 {/* V19: Summary Stat Cards */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
                   <div className="glass-panel" style={{ padding: '20px', textAlign: 'center' }}>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>{t("Bu Ay Toplam Gider")}</div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--danger)' }}>{formatCurrency(totalExpenseMonth)}</div>
@@ -1607,7 +1611,7 @@ function App() {
                 </div>
 
                 {/* V19: Donut Chart + Bar Chart Side by Side */}
-                <div className="glass-panel" style={{ padding: '32px' }}>
+                <div className="glass-panel" style={{ padding: 'clamp(20px, 5vw, 32px)' }}>
                   <h2>Kategori Dağılımı</h2>
                   <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>Giderlerinizin seçili periyottaki dağılımı ({currency})</p>
 
@@ -2288,7 +2292,7 @@ function App() {
 
             <div className="form-group">
               <label>Kategori</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '8px', marginTop: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '8px', marginTop: '8px' }}>
                 {Object.keys(categoryLabels).map(k => (
                   <button
                     type="button"
