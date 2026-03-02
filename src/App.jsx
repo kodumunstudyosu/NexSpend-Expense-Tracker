@@ -238,7 +238,7 @@ function App() {
   const [txType, setTxType] = useState('expense');
   const [txAmount, setTxAmount] = useState('');
   const [txTitle, setTxTitle] = useState('');
-  const [txCategory, setTxCategory] = useState('');
+  const [txCategory, setTxCategory] = useState('other');
   const [txDate, setTxDate] = useState(new Date().toISOString().split('T')[0]);
   const [txNote, setTxNote] = useState('');
   const [txReceiptStr, setTxReceiptStr] = useState(null);
@@ -436,7 +436,7 @@ function App() {
       }
       return prevSubs;
     });
-  }, [subscriptions]); // V12: Added subscriptions as dependency so adding an income Triggers motor immediately
+  }, []); // V12 Fix: empty deps - runs only on mount to process overdue subscriptions, avoiding infinite loop
 
   useEffect(() => localStorage.setItem('nexspend_lang', language), [language]);
   useEffect(() => localStorage.setItem('nexspend_currency', currency), [currency]);
@@ -483,7 +483,7 @@ function App() {
     const todayDate = new Date(new Date().toISOString().split('T')[0]);
 
     return transactions.filter(tx => {
-      const matchesSearch = tx.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = !searchTerm || (tx.title || '').toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = filterType === 'all' || tx.type === filterType;
 
       let matchesTime = true;
@@ -870,6 +870,7 @@ function App() {
     setTxIsSplit(false);
     setTxSplitCount(2);
     setTxDate(new Date().toISOString().split('T')[0]);
+    setTxCategory('other');
     setIsCategoryManual(false); // Reset auto-category flag
     setIsModalOpen(false);
   };
@@ -954,6 +955,7 @@ function App() {
     setSubName('');
     setSubAmount('');
     setSubType('expense');
+    setSubDate('');
   };
 
   const toggleSub = (id) => setSubscriptions(subscriptions.map(s => s.id === id ? { ...s, active: !s.active } : s));
