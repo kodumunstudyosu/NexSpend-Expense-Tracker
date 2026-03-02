@@ -197,21 +197,17 @@ function App() {
   };
 
   // V4: Fetch Live Currency Rates
-  useEffect(() => {
-    fetch('https://open.er-api.com/v6/latest/TRY')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.rates) {
-          // API returns 1 TRY = X USD. We need 1 USD = X TRY (our base multiplier)
-          setRates({
-            TRY: 1,
-            USD: 1 / data.rates.USD,
-            EUR: 1 / data.rates.EUR
-          });
-        }
-      })
-      .catch(err => console.error("Canlı döviz kurları çekilemedi, fallbacks kullanılacak:", err));
-  }, []);
+  // Canlı döviz kuru: Şimdilik devre dışı — sabit kurlar kullanılıyor
+  // useEffect(() => {
+  //   fetch('https://open.er-api.com/v6/latest/TRY')
+  //     .then(res => res.json())
+  //     .then(data => {
+  //       if (data && data.rates) {
+  //         setRates({ TRY: 1, USD: 1 / data.rates.USD, EUR: 1 / data.rates.EUR });
+  //       }
+  //     })
+  //     .catch(err => console.error('Döviz kurları çekilemedi:', err));
+  // }, []);
 
   // Calendar State
   const [calendarDate, setCalendarDate] = useState(new Date());
@@ -348,29 +344,11 @@ function App() {
     { id: 'BTC', name: 'Bitcoin', price: 94500.00, change: +2.45, isUp: true, icon: '₿' }
   ]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMarkets(prev => prev.map(market => {
-        if (Math.random() > 0.4) return market;
-        const fluctuation = market.price * ((Math.random() * 0.001) + 0.0001);
-        const isUp = Math.random() > 0.45;
-        const newPrice = isUp ? market.price + fluctuation : market.price - fluctuation;
-        const newChange = isUp ? market.change + (fluctuation / 10) : market.change - (fluctuation / 10);
-        return {
-          ...market,
-          price: newPrice,
-          change: newChange,
-          isUp: isUp,
-          flash: isUp ? 'up' : 'down'
-        };
-      }));
-
-      setTimeout(() => {
-        setMarkets(prev => prev.map(m => ({ ...m, flash: null })));
-      }, 600);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+  // Market ticker simülasyonu: Şimdilik devre dışı
+  // useEffect(() => {
+  //   const interval = setInterval(() => { ... }, 3000);
+  //   return () => clearInterval(interval);
+  // }, []);
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
   const [assetName, setAssetName] = useState('');
   const [assetType, setAssetType] = useState('bank'); // 'bank', 'crypto', 'gold', 'stock'

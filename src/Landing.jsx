@@ -66,8 +66,8 @@ const FEATURES = [
     {
         emoji: '💹',
         title: 'Varlık ve Piyasa Takibi',
-        desc: 'Döviz, altın, gümüş ve kripto fiyatlarını canlı takip edin. Banka, gayrimenkul ve yatırım varlıklarınızı portföyünüze ekleyin.',
-        tags: ['Canlı Kurlar', 'Altın/Gümüş', 'Kripto', 'Portföy'],
+        desc: 'Döviz, altın, gümüş ve kripto fiyatlarını takip edin. Banka, gayrimenkul ve yatırım varlıklarınızı portföyünüze ekleyin.',
+        tags: ['Altın / Gümüş', 'Kripto', 'Portföy', 'Varlık Yönetimi'],
     },
     {
         emoji: '📈',
