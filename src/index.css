@@ -736,8 +736,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
         bottom: 0;
         left: 0;
         right: 0;
+        top: auto !important;
         width: 100% !important;
-        height: auto;
+        height: auto !important;
         z-index: 1000;
         padding: 8px 16px;
         border-right: none;
