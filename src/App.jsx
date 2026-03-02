@@ -860,7 +860,7 @@ function App() {
       name: subName,
       amount: parseFloat(subAmount),
       nextBillingDate: subDate,
-      category: activeTab === 'incomes' ? 'income' : subCategory,
+      category: activeTab === 'incomes' ? 'income' : (activeTab === 'bills' ? 'bills' : subCategory),
       type: subType, // V12: 'income' or 'expense'
       active: true
     }]);
@@ -1999,8 +1999,8 @@ function App() {
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t("Açık veya koyu tema geçişi")}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className={`btn ${theme === 'dark' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setTheme('dark')}>🌙 {t("Koyu")}</button>
-                      <button className={`btn ${theme === 'light' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setTheme('light')}>☀️ {t("Açık")}</button>
+                      <button className={`btn ${theme === 'dark' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setTheme('dark')}>🌙 {t("Karanlık")}</button>
+                      <button className={`btn ${theme === 'light' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setTheme('light')}>☀️ {t("Aydınlık")}</button>
                     </div>
                   </div>
                 </div>
@@ -2012,11 +2012,20 @@ function App() {
                       <div style={{ fontWeight: '500' }}>Uygulama Para Birimi (Base)</div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Panodaki tüm varlıklar bu kur üzerinden hesaplanıp gösterilecektir.</div>
                     </div>
-                    <select className="form-control" style={{ width: '200px' }} value={currency} onChange={(e) => setCurrency(e.target.value)}>
-                      <option value="TRY">₺ Türk Lirası</option>
-                      <option value="USD">$ Amerikan Doları</option>
-                      <option value="EUR">€ Euro</option>
-                    </select>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+                    {['TRY', 'USD', 'EUR'].map(c => (
+                      <button
+                        type="button"
+                        key={c}
+                        onClick={() => setCurrency(c)}
+                        className={`icon-picker-btn ${currency === c ? 'selected' : ''}`}
+                        style={{ padding: '16px 8px', gap: '8px' }}
+                      >
+                        <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{CURRENCY_SYMBOLS[c]}</span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>{c === 'TRY' ? 'Türk Lirası' : c === 'USD' ? 'Dolar' : 'Euro'}</span>
+                      </button>
+                    ))}
                   </div>
                   <div className="setting-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--glass-border)' }}>
                     <div>
@@ -2213,11 +2222,11 @@ function App() {
               <label>Aylık Tutar</label>
               <input type="number" className="form-control" required min="0.01" step="0.01" value={subAmount} onChange={(e) => setSubAmount(e.target.value)} />
             </div>
-            {activeTab !== 'incomes' && (
+            {activeTab === 'subscriptions' && (
               <div className="form-group">
                 <label>Kategori</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px', marginTop: '8px' }}>
-                  {Object.keys(activeTab === 'bills' ? billCategoryLabels : categoryLabels).map(k => (
+                  {Object.keys(categoryLabels).map(k => (
                     <button
                       type="button"
                       key={k}
@@ -2225,8 +2234,8 @@ function App() {
                       className={`icon-picker-btn ${subCategory === k ? 'selected' : ''}`}
                       style={{ padding: '10px 4px', gap: '6px' }}
                     >
-                      {activeTab === 'bills' ? billCategoryIcons[k] : categoryIcons[k]}
-                      <span style={{ fontSize: '0.65rem', fontWeight: '500', textAlign: 'center', wordBreak: 'break-word', lineHeight: '1' }}>{t(activeTab === 'bills' ? billCategoryLabels[k] : categoryLabels[k])}</span>
+                      {categoryIcons[k]}
+                      <span style={{ fontSize: '0.65rem', fontWeight: '500', textAlign: 'center', wordBreak: 'break-word', lineHeight: '1' }}>{t(categoryLabels[k])}</span>
                     </button>
                   ))}
                 </div>
