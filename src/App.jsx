@@ -116,6 +116,34 @@ function App() {
     }
   }, [userName, activeTab]);
 
+  // V18: Prevent Body Scroll when any modal is open
+  useEffect(() => {
+    const isAnyModalOpen =
+      isModalOpen ||
+      isBudgetModalOpen ||
+      isGoalModalOpen ||
+      isFundModalOpen ||
+      isSubModalOpen ||
+      isDebtModalOpen ||
+      isAssetModalOpen ||
+      selectedCalendarDay !== null ||
+      isNameModalOpen ||
+      isResetModalOpen;
+
+    if (isAnyModalOpen) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+
+    // Cleanup on unmount
+    return () => document.body.classList.remove('modal-open');
+  }, [
+    isModalOpen, isBudgetModalOpen, isGoalModalOpen, isFundModalOpen,
+    isSubModalOpen, isDebtModalOpen, isAssetModalOpen,
+    selectedCalendarDay, isNameModalOpen, isResetModalOpen
+  ]);
+
   const handleSaveName = (e) => {
     e.preventDefault();
     if (tempUserName && tempUserName.trim()) {
