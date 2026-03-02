@@ -60,7 +60,7 @@ import {
   Share2,
   Music
 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { PieChart, Pie, Cell, Sector, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import * as XLSX from 'xlsx';
 import { locales } from './locales';
 import './index.css';
@@ -1612,22 +1612,37 @@ function App() {
                         <ResponsiveContainer width="100%" height="100%">
                           <PieChart>
                             <Pie
-                              data={chartData}
+                              data={chartData.map(d => ({ ...d, displayName: categoryLabels[d.name] || d.name }))}
                               cx="50%"
                               cy="50%"
                               innerRadius={80}
                               outerRadius={130}
                               paddingAngle={3}
                               dataKey="value"
+                              nameKey="displayName"
                               stroke="none"
+                              activeShape={(props) => {
+                                const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+                                return (
+                                  <Sector
+                                    cx={cx}
+                                    cy={cy}
+                                    innerRadius={innerRadius - 4}
+                                    outerRadius={outerRadius + 8}
+                                    startAngle={startAngle}
+                                    endAngle={endAngle}
+                                    fill={fill}
+                                    stroke="none"
+                                  />
+                                );
+                              }}
                             >
                               {chartData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                               ))}
                             </Pie>
                             <Tooltip
-                              formatter={(value) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value)}
-                              labelFormatter={(label) => categoryLabels[label] || label}
+                              formatter={(value, name) => [new Intl.NumberFormat('tr-TR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value), name]}
                               contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--text-primary)' }}
                             />
                           </PieChart>
