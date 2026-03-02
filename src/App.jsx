@@ -1538,73 +1538,160 @@ function App() {
           )}
 
           {/* TAB 2: ANALYTICS & INSIGHTS */}
-          {activeTab === 'analytics' && (
-            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {activeTab === 'analytics' && (() => {
+            // V19: Summary Stats Calculations
+            const thisMonthExpenses = transactions.filter(tx => {
+              const d = new Date(tx.originalDate || tx.date);
+              const now = new Date();
+              return tx.type === 'expense' && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            });
+            const thisMonthIncomes = transactions.filter(tx => {
+              const d = new Date(tx.originalDate || tx.date);
+              const now = new Date();
+              return tx.type === 'income' && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            });
+            const totalExpenseMonth = thisMonthExpenses.reduce((s, tx) => s + Math.abs(tx.amount), 0);
+            const totalIncomeMonth = thisMonthIncomes.reduce((s, tx) => s + Math.abs(tx.amount), 0);
+            const topCategory = chartData.length > 0 ? chartData.reduce((max, c) => c.value > max.value ? c : max, chartData[0]) : null;
+            const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+            const dailyAvg = totalExpenseMonth / Math.max(new Date().getDate(), 1);
 
-              {/* AI AI Insights */}
-              <div className="glass-panel" style={{ padding: '24px', borderLeft: '4px solid var(--accent-primary)' }}>
-                <h2 style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <Lightbulb color="var(--accent-primary)" size={24} /> Finansal İçgörüler
-                </h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {aiInsights.map((insight, idx) => {
-                    let icon = <CheckCircle2 color="var(--success)" />;
-                    if (insight.type === 'danger' || insight.type === 'alert') icon = <AlertCircle color="var(--danger)" />;
-                    if (insight.type === 'warning') icon = <TrendingDown color="#f59e0b" />;
-                    return (
-                      <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', background: 'var(--bg-tertiary)', padding: '16px', borderRadius: '12px' }}>
-                        <div style={{ marginTop: '2px' }}>{icon}</div>
-                        <p style={{ margin: 0, color: 'var(--text-primary)', lineHeight: 1.5 }}>{insight.text}</p>
+            return (
+              <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+                {/* V19: Summary Stat Cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
+                  <div className="glass-panel" style={{ padding: '20px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>{t("Bu Ay Toplam Gider")}</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--danger)' }}>{formatCurrency(totalExpenseMonth)}</div>
+                  </div>
+                  <div className="glass-panel" style={{ padding: '20px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>{t("Bu Ay Toplam Gelir")}</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--success)' }}>{formatCurrency(totalIncomeMonth)}</div>
+                  </div>
+                  <div className="glass-panel" style={{ padding: '20px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>{t("G\u00fcnl\u00fck Ortalama Gider")}</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{formatCurrency(dailyAvg)}</div>
+                  </div>
+                  <div className="glass-panel" style={{ padding: '20px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>{t("En \u00c7ok Harcanan")}</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent-primary)' }}>{topCategory ? (categoryLabels[topCategory.name] || topCategory.name) : '-'}</div>
+                    {topCategory && <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>{formatCurrency(topCategory.value)}</div>}
+                  </div>
+                </div>
+
+                {/* AI Insights */}
+                <div className="glass-panel" style={{ padding: '24px', borderLeft: '4px solid var(--accent-primary)' }}>
+                  <h2 style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                    <Lightbulb color="var(--accent-primary)" size={24} /> Finansal \u0130\u00e7g\u00f6r\u00fcler
+                  </h2>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {aiInsights.map((insight, idx) => {
+                      let icon = <CheckCircle2 color="var(--success)" />;
+                      if (insight.type === 'danger' || insight.type === 'alert') icon = <AlertCircle color="var(--danger)" />;
+                      if (insight.type === 'warning') icon = <TrendingDown color="#f59e0b" />;
+                      return (
+                        <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', background: 'var(--bg-tertiary)', padding: '16px', borderRadius: '12px' }}>
+                          <div style={{ marginTop: '2px' }}>{icon}</div>
+                          <p style={{ margin: 0, color: 'var(--text-primary)', lineHeight: 1.5 }}>{insight.text}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* V19: Donut Chart + Bar Chart Side by Side */}
+                <div className="glass-panel" style={{ padding: '32px' }}>
+                  <h2>{t("Kategori Da\u011f\u0131l\u0131m\u0131")}</h2>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>{t("Giderlerinizin se\u00e7ili periyottaki da\u011f\u0131l\u0131m\u0131")} ({currency})</p>
+
+                  {chartData.length > 0 ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px', alignItems: 'center' }}>
+                      {/* Donut Chart */}
+                      <div style={{ height: '300px', position: 'relative' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={chartData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={70}
+                              outerRadius={110}
+                              paddingAngle={3}
+                              dataKey="value"
+                              stroke="none"
+                            >
+                              {chartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Tooltip
+                              formatter={(value) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value)}
+                              labelFormatter={(label) => categoryLabels[label] || label}
+                              contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                        {/* Center Label */}
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Toplam</div>
+                          <div style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>{formatCurrency(chartData.reduce((s, c) => s + c.value, 0))}</div>
+                        </div>
                       </div>
-                    )
-                  })}
+
+                      {/* Bar Chart */}
+                      <div className="chart-container">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--glass-border)" vertical={false} />
+                            <XAxis
+                              dataKey="name"
+                              stroke="var(--text-secondary)"
+                              tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
+                              tickFormatter={(value) => categoryLabels[value] || value}
+                            />
+                            <YAxis
+                              stroke="var(--text-secondary)"
+                              tick={{ fill: 'var(--text-secondary)' }}
+                              tickFormatter={(value) => new Intl.NumberFormat('tr-TR', { notation: 'compact', compactDisplay: 'short' }).format(value)}
+                            />
+                            <Tooltip
+                              formatter={(value) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value)}
+                              labelFormatter={(label) => categoryLabels[label] || label}
+                              contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                              itemStyle={{ color: 'var(--text-primary)' }}
+                              cursor={{ fill: 'var(--glass-bg)' }}
+                            />
+                            <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                              {chartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
+                      <p>{t("G\u00f6sterilecek harcama verisi bulunmuyor.")}</p>
+                    </div>
+                  )}
+
+                  {/* Category Legend */}
+                  {chartData.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '24px', justifyContent: 'center' }}>
+                      {chartData.map((entry, index) => (
+                        <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                          <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: COLORS[index % COLORS.length] }}></div>
+                          {categoryLabels[entry.name] || entry.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Chart */}
-              <div className="glass-panel" style={{ padding: '32px' }}>
-                <h2>{t("Kategori Dağılımı")}</h2>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>{t("Giderlerinizin seçili periyottaki dağılımı")} ({currency})</p>
-
-                {chartData.length > 0 ? (
-                  <div className="chart-container">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--glass-border)" vertical={false} />
-                        <XAxis
-                          dataKey="name"
-                          stroke="var(--text-secondary)"
-                          tick={{ fill: 'var(--text-secondary)' }}
-                          tickFormatter={(value) => categoryLabels[value] || value}
-                        />
-                        <YAxis
-                          stroke="var(--text-secondary)"
-                          tick={{ fill: 'var(--text-secondary)' }}
-                          tickFormatter={(value) => new Intl.NumberFormat('tr-TR', { notation: 'compact', compactDisplay: 'short' }).format(value)}
-                        />
-                        <Tooltip
-                          formatter={(value) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value)}
-                          labelFormatter={(label) => categoryLabels[label] || label}
-                          contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--text-primary)' }}
-                          itemStyle={{ color: 'var(--text-primary)' }}
-                          cursor={{ fill: 'var(--glass-bg)' }}
-                        />
-                        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                          {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
-                    <p>{t("Gösterilecek harcama verisi bulunmuyor.")}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* TAB: GOALS */}
           {activeTab === 'goals' && (
