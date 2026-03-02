@@ -137,7 +137,7 @@ export default function Landing() {
                         onMouseEnter={e => { e.target.style.opacity = '0.85'; e.target.style.transform = 'scale(1.03)'; }}
                         onMouseLeave={e => { e.target.style.opacity = '1'; e.target.style.transform = 'scale(1)'; }}
                     >
-                        Uygulamayı Aç →
+                        Uygulamayı Aç
                     </button>
                 </div>
             </nav>
@@ -182,7 +182,7 @@ export default function Landing() {
                             onMouseEnter={e => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = `0 16px 40px rgba(139,92,246,0.45)`; }}
                             onMouseLeave={e => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = `0 8px 32px rgba(139,92,246,0.35)`; }}
                         >
-                            Hemen Başla — Ücretsiz →
+                            Ücretsiz Başla
                         </button>
                         <a href="#features" style={{
                             background: 'transparent', color: '#fff', border: `1px solid ${BORDER}`,
@@ -397,7 +397,7 @@ export default function Landing() {
                         onMouseEnter={e => { e.target.style.transform = 'translateY(-3px) scale(1.02)'; e.target.style.boxShadow = `0 16px 50px rgba(139,92,246,0.5)`; }}
                         onMouseLeave={e => { e.target.style.transform = 'translateY(0) scale(1)'; e.target.style.boxShadow = `0 8px 40px rgba(139,92,246,0.4)`; }}
                     >
-                        Uygulamayı Aç — Tamamen Ücretsiz →
+                        Uygulamayı Aç
                     </button>
                 </FadeIn>
             </section>
@@ -412,7 +412,7 @@ export default function Landing() {
                     © 2026 NexSpend · Kişisel Finans Uygulaması
                 </div>
                 <button onClick={() => navigate('/app')} style={{ background: 'transparent', border: `1px solid ${BORDER}`, color: 'rgba(255,255,255,0.6)', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '0.85rem' }}>
-                    Uygulamayı Aç →
+                    Uygulamayı Aç
                 </button>
             </footer>
         </div>
