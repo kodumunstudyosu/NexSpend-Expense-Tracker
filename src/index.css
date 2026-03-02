@@ -68,6 +68,19 @@
     box-sizing: border-box;
 }
 
+/* Remove focus outline on SVG chart elements (Recharts) - PC & Mobile */
+svg:focus,
+svg:focus-visible,
+svg *:focus,
+svg *:focus-visible,
+.recharts-wrapper:focus,
+.recharts-wrapper *:focus,
+.recharts-surface:focus,
+.recharts-surface {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-primary);
