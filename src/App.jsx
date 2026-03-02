@@ -51,7 +51,10 @@ import {
   Droplet,
   Zap,
   Flame,
-  Activity
+  Activity,
+  Download,
+  Upload,
+  Shield
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import * as XLSX from 'xlsx';
@@ -126,6 +129,67 @@ function App() {
     localStorage.clear();
     localStorage.setItem('nexspend_reset', 'true');
     window.location.reload();
+  };
+
+  // V17: Backup & Restore System
+  const backupFileRef = useRef(null);
+  const BACKUP_KEYS = [
+    'nexspend_transactions', 'nexspend_goals', 'nexspend_subscriptions',
+    'nexspend_debts', 'nexspend_assets', 'nexspend_budget', 'nexspend_theme',
+    'nexspend_lang', 'nexspend_currency', 'nexspend_user', 'nexspend_active_tab'
+  ];
+
+  const lastBackupDate = localStorage.getItem('nexspend_last_backup');
+  const isBackupStale = !lastBackupDate || (Date.now() - new Date(lastBackupDate).getTime()) > 24 * 60 * 60 * 1000;
+  const [backupBannerDismissed, setBackupBannerDismissed] = useState(false);
+
+  const handleBackupData = () => {
+    const backupData = {};
+    BACKUP_KEYS.forEach(key => {
+      const val = localStorage.getItem(key);
+      if (val !== null) backupData[key] = val;
+    });
+    backupData._nexspend_backup_version = '1.0';
+    backupData._nexspend_backup_date = new Date().toISOString();
+
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dateStr = new Date().toISOString().split('T')[0];
+    a.href = url;
+    a.download = `nexspend_yedek_${dateStr}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    localStorage.setItem('nexspend_last_backup', new Date().toISOString());
+    setBackupBannerDismissed(true);
+  };
+
+  const handleRestoreData = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data._nexspend_backup_version) {
+          alert('Bu dosya geçerli bir NexSpend yedek dosyası değil!');
+          return;
+        }
+        BACKUP_KEYS.forEach(key => {
+          if (data[key] !== undefined) {
+            localStorage.setItem(key, data[key]);
+          }
+        });
+        localStorage.setItem('nexspend_last_backup', new Date().toISOString());
+        alert('✅ Veriler başarıyla geri yüklendi! Sayfa yenilenecek.');
+        window.location.reload();
+      } catch (err) {
+        alert('Dosya okunamadı. Lütfen geçerli bir .json yedek dosyası seçin.');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // Reset input
   };
 
   // V4: Fetch Live Currency Rates
@@ -1177,6 +1241,24 @@ function App() {
             <p className="page-subtitle">{t("İşte finansal özetin")}</p>
           </div>
 
+          {/* V17: Backup Reminder Banner */}
+          {isBackupStale && !backupBannerDismissed && (
+            <div style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05))', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '-8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
+                <Shield size={18} color="#f59e0b" />
+                <span>{lastBackupDate ? `Son yedeğiniz ${new Date(lastBackupDate).toLocaleDateString('tr-TR')} tarihli. Verilerinizi güvende tutmak için yedekleyin.` : 'Henüz hiç yedek almadınız. Verilerinizi koruma altına alın!'}</span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '0.8rem', background: '#f59e0b' }} onClick={handleBackupData}>
+                  <Download size={14} /> Şimdi Yedekle
+                </button>
+                <button className="icon-btn" style={{ padding: '4px', color: 'var(--text-secondary)' }} onClick={() => setBackupBannerDismissed(true)}>
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {/* V4: Notification Bell & Dropdown */}
             <div style={{ position: 'relative' }}>
@@ -2062,6 +2144,26 @@ function App() {
                         <FileSpreadsheet size={16} style={{ marginRight: '6px' }} /> Excel (.xlsx)
                       </button>
                     </div>
+                  </div>
+                </div>
+
+                {/* V17: Backup & Restore Section */}
+                <div style={{ background: 'var(--bg-tertiary)', padding: '24px', borderRadius: '12px', border: '1px solid rgba(139,92,246,0.3)' }}>
+                  <h3 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}><Shield size={18} color="var(--accent-primary)" /> Veri Yedekleme & Geri Yükleme</h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>Tüm verilerinizi JSON dosyası olarak telefonunuza indirin. Tarayıcı verileri silinse bile bu dosyadan geri yükleyebilirsiniz.</p>
+                  {lastBackupDate && (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '12px', background: 'var(--bg-secondary)', padding: '8px 12px', borderRadius: '8px' }}>
+                      ⏰ Son Yedek: {new Date(lastBackupDate).toLocaleString('tr-TR')}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    <button className="btn btn-primary" onClick={handleBackupData} style={{ flex: 1, minWidth: '140px' }}>
+                      <Download size={16} /> Verileri Yedekle
+                    </button>
+                    <button className="btn btn-secondary" onClick={() => backupFileRef.current?.click()} style={{ flex: 1, minWidth: '140px' }}>
+                      <Upload size={16} /> Yedeği Geri Yükle
+                    </button>
+                    <input ref={backupFileRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleRestoreData} />
                   </div>
                 </div>
 
