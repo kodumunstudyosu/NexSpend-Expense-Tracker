@@ -64,10 +64,10 @@ const FEATURES = [
         tags: ['Aylık Görünüm', 'Etkinlik Listesi', 'Vade Takibi'],
     },
     {
-        emoji: '💹',
-        title: 'Varlık ve Piyasa Takibi',
-        desc: 'Döviz, altın, gümüş ve kripto fiyatlarını takip edin. Banka, gayrimenkul ve yatırım varlıklarınızı portföyünüze ekleyin.',
-        tags: ['Altın / Gümüş', 'Kripto', 'Portföy', 'Varlık Yönetimi'],
+        emoji: '💼',
+        title: 'Varlık Yönetimi',
+        desc: 'Banka hesapları, nakit, kripto, altın ve gayrimenkul varlıklarınızı tek bir portföyde takip edin. Net servetinizi anlık görün.',
+        tags: ['Portföy', 'Net Servet', 'Kripto', 'Altın'],
     },
     {
         emoji: '📈',
@@ -225,7 +225,7 @@ export default function Landing() {
                                     <span style={{ fontSize: '1.2rem' }}>💼</span>
                                     <span style={{ fontWeight: '700', background: `linear-gradient(135deg, ${PURPLE}, #6366f1)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>NexSpend</span>
                                 </div>
-                                {['🏠 Dashboard', '📊 İstatistikler', '🎯 Hedefler', '📅 Takvim', '🤝 Borç Defteri', '🔄 Abonelikler', '💼 Varlıklarım', '⚙️ Ayarlar'].map((item, i) => (
+                                {['🏠 Ana Sayfa', '📊 İstatistikler', '🎯 Hedefler', '📅 Takvim', '🤝 Borç Defteri', '🔄 Abonelikler', '💼 Varlıklarım', '⚙️ Ayarlar'].map((item, i) => (
                                     <div key={i} style={{
                                         padding: '10px 12px', borderRadius: '8px', marginBottom: '4px',
                                         background: i === 0 ? `rgba(139,92,246,0.15)` : 'transparent',

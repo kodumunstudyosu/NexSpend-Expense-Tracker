@@ -76,7 +76,7 @@ const CURRENCY_SYMBOLS = {
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('nexspend_active_tab') || 'dashboard');
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   useEffect(() => {
     localStorage.setItem('nexspend_active_tab', activeTab);
@@ -1207,7 +1207,7 @@ function App() {
         </div>
         <nav className="nav-menu">
           <a href="#" className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setActiveTab('dashboard'); }}>
-            <Home size={20} /> <span style={{ marginLeft: '12px' }}>{t("Dashboard")}</span>
+            <Home size={20} /> <span style={{ marginLeft: '12px' }}>{t("Ana Sayfa")}</span>
           </a>
           <a href="#" className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setActiveTab('analytics'); }}>
             <PieChartIcon size={20} /> <span style={{ marginLeft: '12px' }}>{t("İstatistikler")}</span>
@@ -2011,33 +2011,7 @@ function App() {
                 </div>
               </div>
 
-              {/* V15 Live Markets Ticker */}
-              <div style={{ marginBottom: '32px' }}>
-                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontSize: '1.1rem' }}>
-                  <Activity size={20} color="var(--accent-primary)" /> Canlı Piyasa Verileri
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '12px' }}>Demo</span>
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
-                  {markets.map(market => (
-                    <div key={market.id} className={`glass-panel market-card ${market.flash === 'up' ? 'market-flash-up' : market.flash === 'down' ? 'market-flash-down' : ''}`} style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-tertiary)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '1.5rem' }}>{market.icon}</span>
-                        <div>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{market.id}</div>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{market.name}</div>
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontWeight: 'bold' }}>{market.price.toFixed(2)}</div>
-                        <div style={{ fontSize: '0.8rem', color: market.isUp ? 'var(--success)' : 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', marginTop: '2px' }}>
-                          {market.isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                          {Math.abs(market.change).toFixed(2)}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {/* Canlı piyasa verileri kaldırıldı */}
 
               {/* Assets Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
