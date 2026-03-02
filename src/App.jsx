@@ -850,7 +850,7 @@ function App() {
       id: Date.now(),
       date: formattedDate,
       originalDate: txDate,
-      title: txTitle,
+      title: txTitle.trim() || (txType === 'expense' ? 'Gider' : 'Gelir'),
       note: txNote,
       category: txCategory,
       amount: txType === 'expense' ? -Math.abs(finalAmount) : Math.abs(finalAmount), // Kullanıcıya düşen ana pay
@@ -2303,7 +2303,7 @@ function App() {
 
             <div className="form-group">
               <label>{t("İşlem Başlığı")}</label>
-              <input type="text" className="form-control" required value={txTitle} onChange={(e) => setTxTitle(e.target.value)} />
+              <input type="text" className="form-control" placeholder={t("Opsiyonel")} value={txTitle} onChange={(e) => setTxTitle(e.target.value)} />
             </div>
 
             <div className="form-group">
