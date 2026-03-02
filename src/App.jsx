@@ -1530,10 +1530,7 @@ function App() {
                           </div>
                           <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{goal.title}</h3>
                         </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button className="btn btn-secondary" onClick={() => handleOpenFundModal(goal.id)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>Bakiye Ekle</button>
-                          <button className="icon-btn" onClick={() => handleDeleteGoal(goal.id)} style={{ color: 'var(--text-secondary)' }}><Trash2 size={16} /></button>
-                        </div>
+                        <button className="icon-btn" onClick={() => handleDeleteGoal(goal.id)} style={{ color: 'var(--text-secondary)' }}><Trash2 size={16} /></button>
                       </div>
 
                       <div style={{ marginBottom: '16px' }}>
@@ -1549,7 +1546,7 @@ function App() {
                       <button
                         className="btn btn-secondary"
                         style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)' }}
-                        onClick={() => handleAddFundToGoal(goal.id)}
+                        onClick={() => handleOpenFundModal(goal.id)}
                         disabled={isCompleted}
                       >
                         <Plus size={16} /> {isCompleted ? 'Hedefe Ulaşıldı' : 'Para Ekle'}
