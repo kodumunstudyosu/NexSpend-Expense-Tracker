@@ -1064,26 +1064,35 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 
     /* ── TOPBAR ── */
     .topbar {
-        flex-wrap: nowrap !important;
-        align-items: center !important;
-        flex-direction: row !important;
-        gap: 8px;
-        padding: 12px 16px !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+        padding: 16px !important;
     }
 
     .topbar .page-title {
-        font-size: clamp(0.95rem, 4vw, 1.2rem) !important;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: 1.25rem !important;
+        white-space: normal !important;
     }
 
     .topbar .page-subtitle {
-        font-size: 0.75rem !important;
+        font-size: 0.8rem !important;
+        opacity: 0.8;
     }
 
     .topbar>div:last-child {
-        flex-shrink: 0;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        gap: 12px !important;
+    }
+
+    .topbar .btn-primary {
+        flex: 1;
+        justify-content: center !important;
+        padding: 10px 16px !important;
     }
 
     /* ── NAV ITEM: Küçük etiketler göster ── */
