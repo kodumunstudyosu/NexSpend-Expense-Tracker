@@ -54,7 +54,11 @@ import {
   Activity,
   Download,
   Upload,
-  Shield
+  Shield,
+  Tv2,
+  Bot,
+  Share2,
+  Music
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import * as XLSX from 'xlsx';
@@ -285,7 +289,7 @@ function App() {
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
   const [subName, setSubName] = useState('');
   const [subAmount, setSubAmount] = useState('');
-  const [subCategory, setSubCategory] = useState('entertainment');
+  const [subCategory, setSubCategory] = useState('streaming');
   const [subType, setSubType] = useState('expense'); // V12: 'income' or 'expense'
   const [subDate, setSubDate] = useState('');
 
@@ -1049,6 +1053,27 @@ function App() {
     other: <MoreHorizontal size={20} />
   };
 
+  // V18: Subscription-specific categories
+  const subCategoryLabels = {
+    streaming: 'Dizi / Film',
+    music: 'Müzik',
+    social: 'Sosyal Medya',
+    ai: 'Yapay Zeka',
+    gaming: 'Oyun',
+    cloud: 'Bulut Depolama',
+    other: 'Diğer'
+  };
+
+  const subCategoryIcons = {
+    streaming: <Tv2 size={20} />,
+    music: <Music size={20} />,
+    social: <Share2 size={20} />,
+    ai: <Bot size={20} />,
+    gaming: <Gamepad2 size={20} />,
+    cloud: <Laptop size={20} />,
+    other: <MoreHorizontal size={20} />
+  };
+
   const billCategoryLabels = {
     electricity: 'Elektrik',
     water: 'Su',
@@ -1649,7 +1674,7 @@ function App() {
                   <h2>{t("Aboneliklerim")}</h2>
                   <p style={{ color: 'var(--text-secondary)' }}>{t("Düzenli harcamalarınızı ve aboneliklerinizi yönetin.")}</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => { setSubCategory('entertainment'); setSubType('expense'); setIsSubModalOpen(true); }}>
+                <button className="btn btn-primary" onClick={() => { setSubCategory('streaming'); setSubType('expense'); setIsSubModalOpen(true); }}>
                   <Plus size={18} /> {t("Abonelik Ekle")}
                 </button>
               </div>
@@ -1670,7 +1695,7 @@ function App() {
                     {subscriptions.filter(s => s.category !== 'bills' && s.type !== 'income').map(sub => (
                       <tr key={sub.id} style={{ opacity: sub.active ? 1 : 0.5 }}>
                         <td style={{ fontWeight: '500' }}>{sub.name}</td>
-                        <td><span className="badge" style={{ background: 'var(--bg-tertiary)' }}>{categoryLabels[sub.category]}</span></td>
+                        <td><span className="badge" style={{ background: 'var(--bg-tertiary)' }}>{subCategoryLabels[sub.category] || categoryLabels[sub.category] || sub.category}</span></td>
                         <td><CalendarDays size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> {sub.nextBillingDate}</td>
                         <td style={{ fontWeight: 'bold' }}>{new Intl.NumberFormat('tr-TR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(sub.amount)}</td>
                         <td>
@@ -2369,7 +2394,7 @@ function App() {
               <div className="form-group">
                 <label>Kategori</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px', marginTop: '8px' }}>
-                  {Object.keys(categoryLabels).map(k => (
+                  {Object.keys(subCategoryLabels).map(k => (
                     <button
                       type="button"
                       key={k}
@@ -2377,8 +2402,8 @@ function App() {
                       className={`icon-picker-btn ${subCategory === k ? 'selected' : ''}`}
                       style={{ padding: '10px 4px', gap: '6px' }}
                     >
-                      {categoryIcons[k]}
-                      <span style={{ fontSize: '0.65rem', fontWeight: '500', textAlign: 'center', wordBreak: 'break-word', lineHeight: '1' }}>{t(categoryLabels[k])}</span>
+                      {subCategoryIcons[k]}
+                      <span style={{ fontSize: '0.65rem', fontWeight: '500', textAlign: 'center', wordBreak: 'break-word', lineHeight: '1' }}>{t(subCategoryLabels[k])}</span>
                     </button>
                   ))}
                 </div>
@@ -2410,7 +2435,7 @@ function App() {
                 style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', ...(debtType === 'they_owe' ? { background: 'var(--success)', color: 'white', boxShadow: 'none' } : {}) }}
                 onClick={() => setDebtType('they_owe')}
               >
-                <ArrowUpRight size={18} /> Bana Borcu Var (Alacak)
+                <ArrowUpRight size={18} /> Bana Borcu Var
               </button>
               <button
                 type="button"
