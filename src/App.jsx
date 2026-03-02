@@ -2135,7 +2135,7 @@ function App() {
             </div>
             <div className="form-group">
               <label>Kategori</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px', marginTop: '8px', opacity: activeTab === 'bills' ? 0.5 : 1, pointerEvents: activeTab === 'bills' ? 'none' : 'auto' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px', marginTop: '8px', opacity: activeTab === 'bills' ? 0.5 : 1, pointerEvents: activeTab === 'bills' ? 'none' : undefined }}>
                 {Object.keys(categoryLabels).map(k => (
                   <button
                     type="button"
